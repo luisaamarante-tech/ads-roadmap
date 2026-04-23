@@ -7,7 +7,7 @@
   >
     <div class="feature-request-form">
       <p class="feature-request-form__description">
-        Submit a feature request for the VTEX Agentic CX Roadmap. Our team will
+        Submit a feature request for the VTEX Ads Roadmap. Our team will
         review and triage your request in the selected module's backlog.
       </p>
 
