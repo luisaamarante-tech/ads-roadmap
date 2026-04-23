@@ -59,6 +59,7 @@ def _init_extensions(app: Flask):
     # Cache
     cache_config = {
         "CACHE_TYPE": app.config.get("CACHE_TYPE", "simple"),
+        "CACHE_DEFAULT_TIMEOUT": 0,  # Never expire roadmap data by default
     }
     if app.config.get("REDIS_URL"):
         cache_config["CACHE_REDIS_URL"] = app.config["REDIS_URL"]

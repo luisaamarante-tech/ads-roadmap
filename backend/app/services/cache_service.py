@@ -64,7 +64,7 @@ class CacheService:
     def set_items(self, items: list[RoadmapItem]):
         """Cache all roadmap items."""
         items_data = [item.to_dict() for item in items]
-        self.cache.set(CACHE_KEY_ITEMS, items_data)
+        self.cache.set(CACHE_KEY_ITEMS, items_data, timeout=0)
 
     def get_filtered_items(
         self,
@@ -102,7 +102,7 @@ class CacheService:
     def set_goals(self, goals: list[Goal]):
         """Cache all semester goals."""
         goals_data = [g.to_dict() for g in goals]
-        self.cache.set(CACHE_KEY_GOALS, goals_data)
+        self.cache.set(CACHE_KEY_GOALS, goals_data, timeout=0)
 
     # ==================== Module Operations ====================
 
@@ -119,7 +119,7 @@ class CacheService:
     def set_modules(self, modules: list[Module]):
         """Cache all modules."""
         modules_data = [m.to_dict() for m in modules]
-        self.cache.set(CACHE_KEY_MODULES, modules_data)
+        self.cache.set(CACHE_KEY_MODULES, modules_data, timeout=0)
 
     # ==================== Metadata Operations ====================
 
@@ -135,7 +135,7 @@ class CacheService:
 
     def set_metadata(self, metadata: SyncMetadata):
         """Cache sync metadata."""
-        self.cache.set(CACHE_KEY_METADATA, metadata.to_dict())
+        self.cache.set(CACHE_KEY_METADATA, metadata.to_dict(), timeout=0)
 
     def invalidate(self):
         """Clear all cached data to force a refresh on next request."""
