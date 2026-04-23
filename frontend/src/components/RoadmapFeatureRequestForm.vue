@@ -8,20 +8,20 @@
     <div class="feature-request-form">
       <p class="feature-request-form__description">
         Submit a feature request for the VTEX Ads Roadmap. Our team will
-        review and triage your request in the selected module's backlog.
+        review and triage your request in the selected media type's backlog.
       </p>
 
       <form aria-label="Feature request form" @submit.prevent="handleSubmit">
         <!-- Module Selection -->
         <div class="form-field">
           <label for="module-select" class="form-field__label">
-            Module <span aria-hidden="true">*</span>
+            Media <span aria-hidden="true">*</span>
           </label>
           <div v-if="isLoadingModules" class="form-field__loading">
-            Loading modules...
+            Loading media types...
           </div>
           <p v-else-if="modules.length === 0" class="form-field__empty-modules">
-            Modules will appear as items are added to the roadmap.
+            Media types will appear as items are added to the roadmap.
           </p>
           <select
             v-else
@@ -34,7 +34,7 @@
             :aria-invalid="!!errors.moduleId"
             :aria-describedby="errors.moduleId ? 'module-error' : undefined"
           >
-            <option value="" disabled>Select a module</option>
+            <option value="" disabled>Select a media type</option>
             <option
               v-for="module in modules"
               :key="module.id"
@@ -269,7 +269,7 @@ function validateForm(): boolean {
   errors.value = {};
 
   if (!form.value.moduleId) {
-    errors.value.moduleId = 'Module is required';
+    errors.value.moduleId = 'Media type is required';
   }
 
   if (!form.value.title) {

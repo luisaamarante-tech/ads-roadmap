@@ -30,7 +30,7 @@ class ProjectFieldMapping:
     # Existing custom fields (previously in .env)
     public_roadmap: str
     roadmap_status: str
-    module: str
+    media_type: str
     release_year: str
     release_quarter: str
     release_month: str

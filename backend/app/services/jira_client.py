@@ -221,7 +221,7 @@ class JiraClient:
 
             # Extract custom fields for roadmap data
             status = self._extract_status(fields.get(field_mapping["roadmap_status"]))
-            module = self._extract_text_field(fields.get(field_mapping["module"]))
+            module = self._extract_text_field(fields.get(field_mapping["media_type"]))
             release_year = self._extract_number_field(
                 fields.get(field_mapping["release_year"])
             )

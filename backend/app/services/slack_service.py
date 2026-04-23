@@ -145,7 +145,7 @@ class SlackService:
 
         text = (
             f":bulb: *New Feature Request*\n\n"
-            f"*Module:* {module_name}\n"
+            f"*Media:* {module_name}\n"
             f"*Title:* {title}\n"
             f"*Description:* {description_excerpt}\n"
             f"*Contact:* {contact_email}\n"

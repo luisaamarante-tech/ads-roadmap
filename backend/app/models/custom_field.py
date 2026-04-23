@@ -144,7 +144,7 @@ class FieldMapping:
         labels = {
             "public_roadmap": "Public Roadmap (checkbox)",
             "roadmap_status": "Roadmap Status (DELIVERED/NOW/NEXT/FUTURE)",
-            "module": "Module/Product Area",
+            "media_type": "Media Type",
             "release_year": "Release Year",
             "release_quarter": "Release Quarter (Q1-Q4)",
             "release_month": "Release Month (1-12)",

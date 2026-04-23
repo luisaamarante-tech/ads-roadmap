@@ -71,10 +71,10 @@ const selectedModules = computed({
 
 const moduleButtonLabel = computed(() => {
   const count = selectedModules.value.length;
-  if (count === 0) return 'All Modules';
+  if (count === 0) return 'All Media';
   if (count === 1) {
     const module = props.modules.find((m) => m.id === selectedModules.value[0]);
-    return module?.name || 'All Modules';
+    return module?.name || 'All Media';
   }
   return `${count} Modules`;
 });
@@ -172,7 +172,7 @@ onUnmounted(() => {
         ref="moduleDropdownRef"
         class="filters__group filters__group--modules"
       >
-        <label class="filters__label">Modules</label>
+        <label class="filters__label">Media</label>
         <div class="filters__module-dropdown">
           <button
             type="button"

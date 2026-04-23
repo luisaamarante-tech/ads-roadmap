@@ -472,7 +472,7 @@ def create_feature_request():
             jsonify(
                 {
                     "error": "INVALID_MODULE",
-                    "message": f"Module '{payload.module_id}' is not available for feature requests",
+                    "message": f"Media type '{payload.module_id}' is not available for feature requests",
                 }
             ),
             400,
@@ -589,7 +589,7 @@ def _validate_feature_request_payload(payload: FeatureRequestPayload) -> list[st
 
     # Required fields
     if not payload.module_id:
-        errors.append("Module is required")
+        errors.append("Media type is required")
     if not payload.title:
         errors.append("Title is required")
     if not payload.description:

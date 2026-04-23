@@ -135,7 +135,7 @@ def generate_expected_names(config_key: str) -> List[str]:
             "Status",
             "Release Status",
         ],
-        "module": ["Roadmap Module", "Module", "Product Module", "Area", "Component"],
+        "media_type": ["Media Type", "Roadmap Media Type", "Media", "Area", "Component"],
         "release_year": ["Roadmap Release Year", "Release Year", "Year"],
         "release_quarter": ["Roadmap Release Quarter", "Release Quarter", "Quarter"],
         "release_month": ["Roadmap Release Month", "Release Month", "Month"],
@@ -628,7 +628,7 @@ def map_fields(  # pragma: no cover
     config_keys = [
         "public_roadmap",
         "roadmap_status",
-        "module",
+        "media_type",
         "release_year",
         "release_quarter",
         "release_month",
