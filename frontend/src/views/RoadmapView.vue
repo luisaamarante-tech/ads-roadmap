@@ -365,12 +365,11 @@ onMounted(async () => {
       <!-- Hero section -->
       <header class="roadmap-page__header">
         <h1 class="roadmap-page__title">
-          Roadmap of <span class="roadmap-page__brand">VTEX Ads</span>
+          <span class="roadmap-page__brand">VTEX Ads</span> Roadmap
         </h1>
         <p class="roadmap-page__description">
-          We are building a series of solutions for our platform. Here you can
-          see our plans and goals for each quarter. Stay engaged and know what
-          we're up to!
+          Explore what we're building for VTEX Ads — our product plans,
+          priorities and upcoming features, organized by quarter.
         </p>
 
       </header>
@@ -469,7 +468,7 @@ onMounted(async () => {
 /* BEM: Element - header */
 .roadmap-page__header {
   text-align: center;
-  padding: 60px var(--unnnic-spacing-inline-lg, 24px) 40px;
+  padding: 60px var(--unnnic-spacing-inline-lg, 24px) 24px;
   max-width: 800px;
   margin: 0 auto;
 }
