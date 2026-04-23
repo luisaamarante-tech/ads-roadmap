@@ -69,8 +69,8 @@ function onClick(): void {
 
 .canvas-exit-button:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgb(0 168 168 / 15%);
-  border-color: var(--unnnic-color-weni-500, #10b6af);
+  box-shadow: 0 0 0 3px rgb(247 25 99 / 15%);
+  border-color: #F71963;
 }
 
 .canvas-exit-button:active {

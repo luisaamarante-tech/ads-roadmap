@@ -101,7 +101,7 @@ withDefaults(defineProps<Props>(), {
 
 /* BEM: Element - icon */
 .canvas-empty-state__icon {
-  color: var(--unnnic-color-weni-600, #01a29b);
+  color: #dd1259;
   margin-bottom: var(--unnnic-spacing-stack-md, 20px);
 }
 

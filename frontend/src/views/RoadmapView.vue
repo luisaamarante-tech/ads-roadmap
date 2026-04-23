@@ -578,4 +578,20 @@ onMounted(async () => {
 .list-swap-leave-to {
   opacity: 0;
 }
+
+/* Override Unnnic primary button with VTEX pink */
+:deep(.unnnic-button--primary) {
+  background-color: #F71963;
+  border-color: #F71963;
+}
+
+:deep(.unnnic-button--primary:hover) {
+  background-color: #dd1259;
+  border-color: #dd1259;
+}
+
+:deep(.unnnic-button--primary:active) {
+  background-color: #b80f4c;
+  border-color: #b80f4c;
+}
 </style>
