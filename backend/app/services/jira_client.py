@@ -167,13 +167,12 @@ class JiraClient:
 
         try:
             response = self._make_request(
-                "/rest/api/3/search",
+                "/rest/api/3/search/jql",
                 method="POST",
                 json_data={
                     "jql": jql,
                     "fields": self.ALLOWED_FIELDS,
                     "maxResults": 100,
-                    "startAt": 0,
                 },
             )
             return response.get("issues", [])
@@ -192,8 +191,8 @@ class JiraClient:
             fields = issue.get("fields", {})
             issue_key = issue.get("key", "")
 
-            # Get project key from issue for project-specific field mapping
-            project_key = fields.get("project", {}).get("key", "")
+            # Get project key from issue key (e.g. "VA-1634" → "VA")
+            project_key = issue_key.split("-")[0] if "-" in issue_key else fields.get("project", {}).get("key", "")
 
             # Try to get project-specific custom fields, otherwise use defaults
             project_fields = self.config.get_project_custom_fields(project_key)
@@ -658,13 +657,12 @@ class JiraClient:
         for jql in [jql_epic, jql_any]:
             try:
                 search_response = self._make_request(
-                    "/rest/api/3/search",
+                    "/rest/api/3/search/jql",
                     method="POST",
                     json_data={
                         "jql": jql,
                         "fields": ["key"],
                         "maxResults": 1,
-                        "startAt": 0,
                     },
                 )
                 issues = search_response.get("issues", [])
