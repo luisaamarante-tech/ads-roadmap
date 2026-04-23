@@ -4,12 +4,13 @@
  */
 
 import { computed, ref, onMounted, onUnmounted } from 'vue';
-import type { Goal, Module, Quarter, RoadmapFilters } from '@/types/roadmap';
+import type { Goal, Module, Pillar, Quarter, RoadmapFilters } from '@/types/roadmap';
 
 interface Props {
   modelValue: RoadmapFilters;
   modules: Module[];
   goals: Goal[];
+  pillars: Pillar[];
   availableYears?: number[];
 }
 
@@ -36,6 +37,8 @@ const isModuleDropdownOpen = ref(false);
 const moduleDropdownRef = ref<HTMLElement | null>(null);
 const isGoalDropdownOpen = ref(false);
 const goalDropdownRef = ref<HTMLElement | null>(null);
+const isPillarDropdownOpen = ref(false);
+const pillarDropdownRef = ref<HTMLElement | null>(null);
 
 const selectedYear = computed({
   get: () => props.modelValue.year ?? 0,
@@ -107,12 +110,38 @@ const goalButtonLabel = computed(() => {
   return `${count} Goals`;
 });
 
+const selectedPillars = computed({
+  get: (): string[] => {
+    const pillar = props.modelValue.pillar;
+    if (!pillar) return [];
+    if (Array.isArray(pillar)) return pillar;
+    return [pillar];
+  },
+  set: (value: string[]) => {
+    emit('update:modelValue', {
+      ...props.modelValue,
+      pillar: value.length > 0 ? value : undefined,
+    });
+  },
+});
+
+const pillarButtonLabel = computed(() => {
+  const count = selectedPillars.value.length;
+  if (count === 0) return 'All Pillars';
+  if (count === 1) {
+    const pillar = props.pillars.find((p) => p.id === selectedPillars.value[0]);
+    return pillar?.name || 'All Pillars';
+  }
+  return `${count} Pillars`;
+});
+
 const hasActiveFilters = computed(() => {
   return !!(
     props.modelValue.year ||
     props.modelValue.quarter ||
     props.modelValue.module ||
-    props.modelValue.goal
+    props.modelValue.goal ||
+    props.modelValue.pillar
   );
 });
 
@@ -149,6 +178,19 @@ function toggleGoalDropdown(): void {
   isGoalDropdownOpen.value = !isGoalDropdownOpen.value;
 }
 
+function onPillarToggle(pillarId: string): void {
+  const current = selectedPillars.value;
+  if (current.includes(pillarId)) {
+    selectedPillars.value = current.filter((id) => id !== pillarId);
+  } else {
+    selectedPillars.value = [...current, pillarId];
+  }
+}
+
+function togglePillarDropdown(): void {
+  isPillarDropdownOpen.value = !isPillarDropdownOpen.value;
+}
+
 function handleClickOutside(event: MouseEvent): void {
   if (
     moduleDropdownRef.value &&
@@ -161,6 +203,12 @@ function handleClickOutside(event: MouseEvent): void {
     !goalDropdownRef.value.contains(event.target as Node)
   ) {
     isGoalDropdownOpen.value = false;
+  }
+  if (
+    pillarDropdownRef.value &&
+    !pillarDropdownRef.value.contains(event.target as Node)
+  ) {
+    isPillarDropdownOpen.value = false;
   }
 }
 
@@ -333,6 +381,68 @@ onUnmounted(() => {
               />
               <span class="filters__module-label">
                 {{ goal.name }} ({{ goal.itemCount }})
+              </span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pillar multi-select dropdown -->
+      <div
+        ref="pillarDropdownRef"
+        class="filters__group filters__group--modules"
+      >
+        <label class="filters__label">Pillar</label>
+        <div class="filters__module-dropdown">
+          <button
+            type="button"
+            class="filters__module-toggle"
+            :aria-expanded="isPillarDropdownOpen"
+            aria-haspopup="true"
+            @click="togglePillarDropdown"
+          >
+            <span>{{ pillarButtonLabel }}</span>
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 12 12"
+              fill="none"
+              :class="[
+                'filters__module-toggle-icon',
+                { 'filters__module-toggle-icon--open': isPillarDropdownOpen },
+              ]"
+              aria-hidden="true"
+            >
+              <path
+                d="M3 4.5L6 7.5L9 4.5"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+          <div
+            v-if="isPillarDropdownOpen"
+            class="filters__module-list"
+            role="menu"
+          >
+            <label
+              v-for="pillar in pillars"
+              :key="pillar.id"
+              class="filters__module-item"
+              role="menuitemcheckbox"
+              :aria-checked="selectedPillars.includes(pillar.id)"
+            >
+              <input
+                type="checkbox"
+                :value="pillar.id"
+                :checked="selectedPillars.includes(pillar.id)"
+                class="filters__module-checkbox"
+                @change="onPillarToggle(pillar.id)"
+              />
+              <span class="filters__module-label">
+                {{ pillar.name }} ({{ pillar.itemCount }})
               </span>
             </label>
           </div>

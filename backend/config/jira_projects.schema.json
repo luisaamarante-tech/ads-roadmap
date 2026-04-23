@@ -126,6 +126,12 @@
               "pattern": "^customfield_\\d{5,}$",
               "description": "Custom field ID for the roadmap semester goal (multi-value)",
               "examples": ["customfield_10108"]
+            },
+            "pillar": {
+              "type": "string",
+              "pattern": "^customfield_\\d{5,}$",
+              "description": "Custom field ID for the roadmap pillar (multi-value)",
+              "examples": ["customfield_10109"]
             }
           },
           "additionalProperties": false

@@ -96,6 +96,15 @@ def get_items():
     else:
         goal = None
 
+    # Handle pillar parameter: can be single value or list
+    pillar_list = request.args.getlist("pillar")
+    if len(pillar_list) == 1:
+        pillar = pillar_list[0]
+    elif len(pillar_list) > 1:
+        pillar = pillar_list
+    else:
+        pillar = None
+
     # Get filtered items
     cache_service = CacheService(cache)
     items = cache_service.get_filtered_items(
@@ -104,6 +113,7 @@ def get_items():
         quarter=quarter,
         module=module,
         goal=goal,
+        pillar=pillar,
     )
 
     # Get metadata
@@ -245,6 +255,14 @@ def get_goals():
     return jsonify({"goals": [goal.to_dict() for goal in goals]})
 
 
+@roadmap_bp.route("/pillars", methods=["GET"])
+def get_pillars():
+    """Get all available pillars for filtering."""
+    cache_service = CacheService(cache)
+    pillars = cache_service.get_pillars()
+    return jsonify({"pillars": [pillar.to_dict() for pillar in pillars]})
+
+
 @roadmap_bp.route("/modules", methods=["GET"])
 def get_modules():
     """
@@ -303,6 +321,15 @@ def get_stats():
     else:
         goal = None
 
+    # Handle pillar parameter
+    pillar_list = request.args.getlist("pillar")
+    if len(pillar_list) == 1:
+        pillar = pillar_list[0]
+    elif len(pillar_list) > 1:
+        pillar = pillar_list
+    else:
+        pillar = None
+
     # Get stats
     cache_service = CacheService(cache)
     stats = cache_service.get_stats(
@@ -310,6 +337,7 @@ def get_stats():
         quarter=quarter,
         module=module,
         goal=goal,
+        pillar=pillar,
     )
 
     # Add metadata

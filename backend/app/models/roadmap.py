@@ -53,6 +53,8 @@ class RoadmapItem:
     last_synced_at: datetime = field(default_factory=datetime.utcnow)
     semester_goals: List[str] = field(default_factory=list)
     semester_goal_ids: List[str] = field(default_factory=list)
+    pillars: List[str] = field(default_factory=list)
+    pillar_ids: List[str] = field(default_factory=list)
 
     def __post_init__(self):
         """Validate and normalize fields after initialization."""
@@ -74,6 +76,10 @@ class RoadmapItem:
         # Generate semester_goal_ids from semester_goals if not set
         if not self.semester_goal_ids and self.semester_goals:
             self.semester_goal_ids = [self._slugify(g) for g in self.semester_goals]
+
+        # Generate pillar_ids from pillars if not set
+        if not self.pillar_ids and self.pillars:
+            self.pillar_ids = [self._slugify(p) for p in self.pillars]
 
     @staticmethod
     def _slugify(text: str) -> str:
@@ -101,6 +107,8 @@ class RoadmapItem:
             "lastSyncedAt": self.last_synced_at.isoformat() + "Z",
             "semesterGoals": self.semester_goals,
             "semesterGoalIds": self.semester_goal_ids,
+            "pillars": self.pillars,
+            "pillarIds": self.pillar_ids,
         }
 
     def matches_filters(
@@ -110,16 +118,9 @@ class RoadmapItem:
         quarter: Optional[str] = None,
         module: Optional[str | List[str]] = None,
         goal: Optional[str | List[str]] = None,
+        pillar: Optional[str | List[str]] = None,
     ) -> bool:
-        """
-        Check if item matches the given filters.
-
-        Args:
-            status: Filter by delivery status
-            year: Filter by release year
-            quarter: Filter by release quarter
-            module: Filter by module (can be a single string or list of module IDs)
-        """
+        """Check if item matches the given filters."""
         if status and self.status.value != status:
             return False
         if year and self.release_year != year:
@@ -139,6 +140,13 @@ class RoadmapItem:
                     return False
             else:
                 if goal not in self.semester_goal_ids:
+                    return False
+        if pillar:
+            if isinstance(pillar, list):
+                if not any(pid in self.pillar_ids for pid in pillar):
+                    return False
+            else:
+                if pillar not in self.pillar_ids:
                     return False
         return True
 
@@ -165,6 +173,18 @@ class Module:
 @dataclass
 class Goal:
     """Represents a semester goal for filtering."""
+
+    id: str  # URL-safe slug
+    name: str  # Display name
+    item_count: int = 0
+
+    def to_dict(self) -> dict:
+        return {"id": self.id, "name": self.name, "itemCount": self.item_count}
+
+
+@dataclass
+class Pillar:
+    """Represents a roadmap pillar for filtering."""
 
     id: str  # URL-safe slug
     name: str  # Display name

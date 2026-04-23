@@ -9,6 +9,7 @@ import type {
   RoadmapItem,
   ModulesResponse,
   GoalsResponse,
+  PillarsResponse,
   RoadmapStatsResponse,
   HealthResponse,
   LikeResponse,
@@ -58,6 +59,15 @@ export async function getRoadmapItems(
     }
   }
 
+  // Handle pillar: can be string or array
+  if (filters.pillar) {
+    if (Array.isArray(filters.pillar)) {
+      filters.pillar.forEach((pillarId) => params.append('pillar', pillarId));
+    } else {
+      params.append('pillar', filters.pillar);
+    }
+  }
+
   const response = await api.get<RoadmapItemsResponse>('/roadmap/items', {
     params,
   });
@@ -95,6 +105,14 @@ export async function getModules(): Promise<ModulesResponse> {
  */
 export async function getGoals(): Promise<GoalsResponse> {
   const response = await api.get<GoalsResponse>('/roadmap/goals');
+  return response.data;
+}
+
+/**
+ * Get all available pillars for filtering.
+ */
+export async function getPillars(): Promise<PillarsResponse> {
+  const response = await api.get<PillarsResponse>('/roadmap/pillars');
   return response.data;
 }
 

@@ -258,6 +258,13 @@ class JiraClient:
                     fields.get(field_mapping["semester_goal"])
                 )
 
+            # Extract pillars (multi-value array field)
+            pillars = []
+            if field_mapping.get("pillar"):
+                pillars = self._extract_list_field(
+                    fields.get(field_mapping["pillar"])
+                )
+
             # Extract images from custom field URLs (new approach)
             # Try custom image URL fields first, fall back to attachments
             images = []
@@ -302,6 +309,7 @@ class JiraClient:
                 likes=likes,
                 last_synced_at=datetime.utcnow(),
                 semester_goals=semester_goals,
+                pillars=pillars,
             )
         except Exception as e:
             logger.error(f"Failed to extract roadmap item from issue: {e}")

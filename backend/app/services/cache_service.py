@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Optional
 
 # Local
-from ..models import DeliveryStatus, Goal, Module, Quarter, RoadmapItem, SyncMetadata
+from ..models import DeliveryStatus, Goal, Module, Pillar, Quarter, RoadmapItem, SyncMetadata
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 CACHE_KEY_ITEMS = "roadmap:items"
 CACHE_KEY_MODULES = "roadmap:modules"
 CACHE_KEY_GOALS = "roadmap:goals"
+CACHE_KEY_PILLARS = "roadmap:pillars"
 CACHE_KEY_METADATA = "roadmap:metadata"
 
 # Fallback file path
@@ -73,13 +74,14 @@ class CacheService:
         quarter: Optional[str] = None,
         module: Optional[str | list[str]] = None,
         goal: Optional[str | list[str]] = None,
+        pillar: Optional[str | list[str]] = None,
     ) -> list[RoadmapItem]:
         """Get items matching the given filters."""
         items = self.get_items()
         return [
             item
             for item in items
-            if item.matches_filters(status, year, quarter, module, goal)
+            if item.matches_filters(status, year, quarter, module, goal, pillar)
         ]
 
     def get_item_by_id(self, item_id: str) -> Optional[RoadmapItem]:
@@ -103,6 +105,20 @@ class CacheService:
         """Cache all semester goals."""
         goals_data = [g.to_dict() for g in goals]
         self.cache.set(CACHE_KEY_GOALS, goals_data, timeout=0)
+
+    # ==================== Pillar Operations ====================
+
+    def get_pillars(self) -> list[Pillar]:
+        """Get all cached pillars."""
+        pillars_data = self.cache.get(CACHE_KEY_PILLARS)
+        if pillars_data is None:
+            pillars_data = self._load_from_fallback().get("pillars", [])
+        return [self._dict_to_pillar(p) for p in pillars_data]
+
+    def set_pillars(self, pillars: list[Pillar]):
+        """Cache all pillars."""
+        pillars_data = [p.to_dict() for p in pillars]
+        self.cache.set(CACHE_KEY_PILLARS, pillars_data, timeout=0)
 
     # ==================== Module Operations ====================
 
@@ -142,6 +158,7 @@ class CacheService:
         self.cache.delete(CACHE_KEY_ITEMS)
         self.cache.delete(CACHE_KEY_MODULES)
         self.cache.delete(CACHE_KEY_GOALS)
+        self.cache.delete(CACHE_KEY_PILLARS)
         self.cache.delete(CACHE_KEY_METADATA)
         logger.info("Cache invalidated")
 
@@ -192,6 +209,7 @@ class CacheService:
         quarter: Optional[str] = None,
         module: Optional[str | list[str]] = None,
         goal: Optional[str | list[str]] = None,
+        pillar: Optional[str | list[str]] = None,
     ) -> dict:
         """Get item counts by status, optionally filtered."""
         items = self.get_filtered_items(
@@ -200,6 +218,7 @@ class CacheService:
             quarter=quarter,
             module=module,
             goal=goal,
+            pillar=pillar,
         )
 
         stats = {
@@ -226,6 +245,7 @@ class CacheService:
                 "items": self.cache.get(CACHE_KEY_ITEMS) or [],
                 "modules": self.cache.get(CACHE_KEY_MODULES) or [],
                 "goals": self.cache.get(CACHE_KEY_GOALS) or [],
+                "pillars": self.cache.get(CACHE_KEY_PILLARS) or [],
                 "metadata": self.cache.get(CACHE_KEY_METADATA) or {},
                 "saved_at": datetime.utcnow().isoformat() + "Z",
             }
@@ -272,11 +292,21 @@ class CacheService:
             ),
             semester_goals=data.get("semesterGoals", []),
             semester_goal_ids=data.get("semesterGoalIds", []),
+            pillars=data.get("pillars", []),
+            pillar_ids=data.get("pillarIds", []),
         )
 
     def _dict_to_goal(self, data: dict) -> Goal:
         """Convert dictionary to Goal."""
         return Goal(
+            id=data.get("id", ""),
+            name=data.get("name", ""),
+            item_count=data.get("itemCount", 0),
+        )
+
+    def _dict_to_pillar(self, data: dict) -> Pillar:
+        """Convert dictionary to Pillar."""
+        return Pillar(
             id=data.get("id", ""),
             name=data.get("name", ""),
             item_count=data.get("itemCount", 0),

@@ -22,6 +22,8 @@ export interface RoadmapItem {
   lastSyncedAt: string;
   semesterGoals: string[];
   semesterGoalIds: string[];
+  pillars: string[];
+  pillarIds: string[];
 }
 
 export interface Module {
@@ -36,12 +38,19 @@ export interface Goal {
   itemCount: number;
 }
 
+export interface Pillar {
+  id: string;
+  name: string;
+  itemCount: number;
+}
+
 export interface RoadmapFilters {
   status?: DeliveryStatus;
   year?: number;
   quarter?: Quarter;
   module?: string | string[];
   goal?: string | string[];
+  pillar?: string | string[];
 }
 
 export interface LikeResponse {
@@ -64,6 +73,10 @@ export interface ModulesResponse {
 
 export interface GoalsResponse {
   goals: Goal[];
+}
+
+export interface PillarsResponse {
+  pillars: Pillar[];
 }
 
 export interface RoadmapStats {

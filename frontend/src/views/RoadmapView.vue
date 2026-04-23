@@ -12,12 +12,14 @@ import type {
   RoadmapFilters,
   Module,
   Goal,
+  Pillar,
 } from '@/types/roadmap';
 import {
   getRoadmapItems,
   getStats,
   getModules,
   getGoals,
+  getPillars,
 } from '@/services/roadmapService';
 import RoadmapTabs from '@/components/RoadmapTabs.vue';
 import RoadmapCardList from '@/components/RoadmapCardList.vue';
@@ -34,6 +36,7 @@ const items = ref<RoadmapItem[]>([]);
 const stats = ref<RoadmapStats | null>(null);
 const modules = ref<Module[]>([]);
 const goals = ref<Goal[]>([]);
+const pillars = ref<Pillar[]>([]);
 const loading = ref(true);
 const error = ref<string | null>(null);
 
@@ -140,6 +143,15 @@ async function handleFetchGoals(): Promise<void> {
     goals.value = response.goals;
   } catch (e) {
     console.error('Failed to fetch goals:', e);
+  }
+}
+
+async function handleFetchPillars(): Promise<void> {
+  try {
+    const response = await getPillars();
+    pillars.value = response.pillars;
+  } catch (e) {
+    console.error('Failed to fetch pillars:', e);
   }
 }
 
@@ -320,6 +332,7 @@ onMounted(async () => {
     // Don't load modules/stats yet, wait for user interaction
     await handleFetchModules();
     await handleFetchGoals();
+    await handleFetchPillars();
     return;
   }
 
@@ -329,6 +342,7 @@ onMounted(async () => {
   handleFetchStats();
   handleFetchModules();
   handleFetchGoals();
+  handleFetchPillars();
 });
 </script>
 
@@ -364,7 +378,7 @@ onMounted(async () => {
       <!-- Main content -->
       <main class="roadmap-page__content">
         <!-- Filters -->
-        <RoadmapFiltersComponent v-model="filters" :modules="modules" :goals="goals" />
+        <RoadmapFiltersComponent v-model="filters" :modules="modules" :goals="goals" :pillars="pillars" />
 
         <!-- Status tabs -->
         <RoadmapTabs v-model="activeStatus" :stats="stats" />
