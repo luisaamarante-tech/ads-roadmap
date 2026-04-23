@@ -1,0 +1,196 @@
+# Netlify Configuration: Backend
+# This file should be copied to: backend/netlify.toml
+
+# =============================================================================
+# BUILD SETTINGS
+# =============================================================================
+[build]
+  # Base directory for build (relative to repository root)
+  base = "backend"
+  
+  # Build command - install dependencies only (no compilation needed for Python)
+  command = "pip install -r requirements.txt -t ./python_modules"
+  
+  # Publish directory (not used for functions-only deploy, but required)
+  publish = "."
+  
+  # Ignore builds if backend hasn't changed
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- ."
+
+# Build environment (available during dependency installation)
+[build.environment]
+  PYTHON_VERSION = "3.11"
+  PIP_CACHE_DIR = ".pip_cache"
+
+# =============================================================================
+# FUNCTIONS CONFIGURATION
+# =============================================================================
+[functions]
+  # Directory containing serverless function files
+  directory = "netlify/functions"
+  
+  # Use esbuild for faster bundling (for JS/TS functions)
+  node_bundler = "esbuild"
+  
+  # Include Python dependencies
+  included_files = ["python_modules/**", "app/**", "config/**", "data/**"]
+  
+  # Exclude unnecessary files
+  # excluded_patterns = ["tests/**", "*.pyc", "__pycache__/**"]
+
+# =============================================================================
+# CONTEXT-SPECIFIC SETTINGS
+# =============================================================================
+
+# Production context (main branch)
+[context.production]
+  [context.production.environment]
+    FLASK_ENV = "production"
+    LOG_LEVEL = "INFO"
+    # JIRA credentials set in Netlify UI (secrets not in file)
+    # JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN
+
+# Deploy Preview context (pull requests)
+[context.deploy-preview]
+  [context.deploy-preview.environment]
+    FLASK_ENV = "staging"
+    LOG_LEVEL = "DEBUG"
+    SYNC_INTERVAL_MINUTES = "60"  # Sync less frequently in preview
+    CACHE_TYPE = "simple"
+
+# Branch Deploy context (feature branches)
+[context.branch-deploy]
+  [context.branch-deploy.environment]
+    FLASK_ENV = "development"
+    LOG_LEVEL = "DEBUG"
+    SYNC_INTERVAL_MINUTES = "60"
+    CACHE_TYPE = "simple"
+
+# =============================================================================
+# REDIRECTS & REWRITES
+# =============================================================================
+
+# Map API routes to corresponding functions
+# Note: Netlify automatically maps /.netlify/functions/{name} to function handler
+# These redirects provide clean URLs
+
+[[redirects]]
+  from = "/api/v1/health"
+  to = "/.netlify/functions/api-health"
+  status = 200
+
+[[redirects]]
+  from = "/api/v1/roadmap/items/:id"
+  to = "/.netlify/functions/api-roadmap-item?id=:id"
+  status = 200
+
+[[redirects]]
+  from = "/api/v1/roadmap/items"
+  to = "/.netlify/functions/api-roadmap-items"
+  status = 200
+
+[[redirects]]
+  from = "/api/v1/roadmap/modules"
+  to = "/.netlify/functions/api-roadmap-modules"
+  status = 200
+
+[[redirects]]
+  from = "/api/v1/roadmap/stats"
+  to = "/.netlify/functions/api-roadmap-stats"
+  status = 200
+
+# Fallback for undefined API routes
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/not-found"
+  status = 404
+
+# =============================================================================
+# HEADERS
+# =============================================================================
+
+# CORS headers for API responses
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"  # Update to specific origin in production
+    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization"
+    Access-Control-Max-Age = "86400"
+
+# Security headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# =============================================================================
+# SCHEDULED FUNCTIONS
+# =============================================================================
+
+# JIRA sync scheduled function
+# Note: This configuration tells Netlify to run the function on a schedule
+# The actual cron expression is defined in the function code itself
+# See: netlify/functions/scheduled-sync.js
+
+# =============================================================================
+# EDGE HANDLERS (optional, for advanced routing)
+# =============================================================================
+
+# [edge_handlers]
+#   directory = "netlify/edge-handlers"
+
+# =============================================================================
+# DEV SETTINGS (local development with Netlify CLI)
+# =============================================================================
+[dev]
+  # Command to run Flask locally
+  command = "flask run --port 5000"
+  port = 5000
+  targetPort = 5000
+  publish = "."
+  autoLaunch = false
+  
+  # Functions directory for local testing
+  functions = "netlify/functions"
+
+# =============================================================================
+# FUNCTION-SPECIFIC CONFIGURATION
+# =============================================================================
+
+# Configure individual function settings
+# Syntax: [functions."function-name"]
+
+[functions."api-roadmap-items"]
+  # Increase timeout for data-heavy endpoint
+  timeout = 15
+
+[functions."sync-roadmap"]
+  # Sync function needs more time and memory
+  timeout = 26  # Maximum allowed by Netlify
+  memory = 3008  # Maximum memory allocation
+
+[functions."scheduled-sync"]
+  # Scheduled sync configuration
+  schedule = "@hourly"  # Run every hour (production)
+  # For more control, use cron syntax in function code
+
+# =============================================================================
+# NOTES
+# =============================================================================
+# 1. Environment variables (secrets) must be set in Netlify UI under:
+#    Site Settings > Environment Variables
+#
+# 2. To deploy: 
+#    - Push to main branch for production
+#    - Create PR for deploy preview
+#    - Push to feature branch for branch deploy
+#
+# 3. For local testing:
+#    netlify dev
+#
+# 4. To manually deploy:
+#    netlify deploy --prod
+

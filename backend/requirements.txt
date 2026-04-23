@@ -1,0 +1,31 @@
+# Flask and extensions
+flask>=3.0.0
+flask-cors>=4.0.0
+flask-caching>=2.0.0
+flask-limiter>=3.5.0
+
+# Background scheduling
+apscheduler>=3.10.0
+
+# HTTP client for JIRA API
+requests>=2.31.0
+
+# Environment management
+python-dotenv>=1.0.0
+
+# JSON Schema validation
+jsonschema>=4.20.0
+
+# Production server
+gunicorn>=21.0.0
+
+# Development/Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+
+# Linting and Formatting
+black>=24.3.0
+flake8>=7.0.0
+flake8-docstrings>=1.7.0
+flake8-bugbear>=24.2.0
+isort>=5.13.0

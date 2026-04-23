@@ -1,0 +1,89 @@
+# Pre-commit hooks configuration
+# Constitution: "Run pre-commit hooks (linters, formatters, and tests) on every commit"
+# Docs: https://pre-commit.com/
+
+repos:
+  # General hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ^(frontend/node_modules|backend/venv)/
+      - id: end-of-file-fixer
+        exclude: ^(frontend/node_modules|backend/venv)/
+      - id: check-yaml
+        exclude: ^(frontend/node_modules|backend/venv)/
+      - id: check-json
+        exclude: ^(frontend/node_modules|backend/venv)/
+      - id: check-added-large-files
+        args: ['--maxkb=1024']
+      - id: debug-statements
+        exclude: ^(frontend/node_modules|backend/venv)/
+      - id: check-merge-conflict
+
+  # Python: Black formatter
+  - repo: https://github.com/psf/black
+    rev: 24.3.0
+    hooks:
+      - id: black
+        language_version: python3.14
+        files: ^backend/
+        exclude: ^backend/venv/
+
+  # Python: isort import sorter
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        files: ^backend/
+        exclude: ^backend/venv/
+        args: ["--profile", "black"]
+
+  # Python: Flake8 linter
+  # Configuration is read from backend/setup.cfg
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        files: ^backend/
+        exclude: ^backend/venv/
+        args: ['--config=backend/setup.cfg']
+        additional_dependencies:
+          - flake8-bugbear
+
+  # Conventional Commits
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v3.1.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: [feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert]
+
+  # Frontend hooks (ESLint, Prettier, Stylelint)
+  - repo: local
+    hooks:
+      - id: frontend-lint
+        name: Frontend ESLint
+        entry: bash -c 'cd frontend && npm run lint:check'
+        language: system
+        files: ^frontend/src/.*\.(ts|vue|js)$
+        pass_filenames: false
+
+      - id: frontend-format
+        name: Frontend Prettier
+        entry: bash -c 'cd frontend && npm run format:check'
+        language: system
+        files: ^frontend/src/.*\.(ts|vue|js|css)$
+        pass_filenames: false
+
+      - id: frontend-stylelint
+        name: Frontend Stylelint
+        entry: bash -c 'cd frontend && npm run stylelint:check'
+        language: system
+        files: ^frontend/src/.*\.(vue|css)$
+        pass_filenames: false
+
+# Configuration
+default_stages: [pre-commit]
+fail_fast: true
+exclude: ^specs/

@@ -1,0 +1,78 @@
+# Pre-commit Configuration Contract
+# Location: /.pre-commit-config.yaml
+# Purpose: Define hooks that run before each commit
+# Constitution: "Pre-commit hooks MUST run: linters (Black, Flake8, ESLint), formatters, and unit tests"
+
+# Minimum compatible version
+minimum_pre_commit_version: "3.0.0"
+
+repos:
+  # Python Formatting - Black
+  - repo: https://github.com/psf/black
+    rev: "24.3.0"
+    hooks:
+      - id: black
+        name: Format Python with Black
+        language_version: python3.11
+        args: ["--config", "backend/pyproject.toml"]
+        files: ^backend/.*\.py$
+
+  # Python Import Sorting - isort
+  - repo: https://github.com/pycqa/isort
+    rev: "5.13.2"
+    hooks:
+      - id: isort
+        name: Sort Python Imports
+        args: ["--settings-path", "backend/pyproject.toml"]
+        files: ^backend/.*\.py$
+
+  # Python Linting - Flake8
+  - repo: https://github.com/pycqa/flake8
+    rev: "7.0.0"
+    hooks:
+      - id: flake8
+        name: Lint Python with Flake8
+        args: ["--config", "backend/setup.cfg"]
+        files: ^backend/.*\.py$
+        additional_dependencies:
+          - flake8-docstrings>=1.7.0
+          - flake8-bugbear>=24.2.0
+
+  # Frontend Linting - ESLint
+  - repo: local
+    hooks:
+      - id: eslint
+        name: Lint Frontend with ESLint
+        entry: bash -c 'cd frontend && npm run lint'
+        language: system
+        files: ^frontend/.*\.(vue|ts|js)$
+        pass_filenames: false
+
+      # Frontend Formatting - Prettier
+      - id: prettier
+        name: Format Frontend with Prettier
+        entry: bash -c 'cd frontend && npx prettier --check "src/**/*.{vue,ts,js,css}"'
+        language: system
+        files: ^frontend/.*\.(vue|ts|js|css)$
+        pass_filenames: false
+
+      # CSS Linting - Stylelint
+      - id: stylelint
+        name: Lint CSS with Stylelint
+        entry: bash -c 'cd frontend && npx stylelint "src/**/*.{vue,css}"'
+        language: system
+        files: ^frontend/.*\.(vue|css)$
+        pass_filenames: false
+
+  # Conventional Commits
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: "v3.1.0"
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: ["feat", "fix", "docs", "style", "refactor", "test", "chore"]
+
+# Note: Test execution is handled by CI pipeline, not pre-commit
+# Rationale: Tests can be slow; blocking commits for full test suite
+# impacts developer productivity. CI ensures tests pass before merge.
+

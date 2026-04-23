@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+      - JIRA_BASE_URL=${JIRA_BASE_URL}
+      - JIRA_EMAIL=${JIRA_EMAIL}
+      - JIRA_API_TOKEN=${JIRA_API_TOKEN}
+      # Projects are configured in config/jira_projects.json (mounted below)
+      - JIRA_FIELD_PUBLIC_ROADMAP=${JIRA_FIELD_PUBLIC_ROADMAP:-customfield_10001}
+      - JIRA_FIELD_ROADMAP_STATUS=${JIRA_FIELD_ROADMAP_STATUS:-customfield_10002}
+      - JIRA_FIELD_MODULE=${JIRA_FIELD_MODULE:-customfield_10003}
+      - JIRA_FIELD_RELEASE_YEAR=${JIRA_FIELD_RELEASE_YEAR:-customfield_10004}
+      - JIRA_FIELD_RELEASE_QUARTER=${JIRA_FIELD_RELEASE_QUARTER:-customfield_10005}
+      - JIRA_FIELD_RELEASE_MONTH=${JIRA_FIELD_RELEASE_MONTH:-customfield_10006}
+      - JIRA_FIELD_DOCUMENTATION_URL=${JIRA_FIELD_DOCUMENTATION_URL:-customfield_10007}
+      - SYNC_INTERVAL_MINUTES=${SYNC_INTERVAL_MINUTES:-5}
+      - CACHE_TYPE=${CACHE_TYPE:-simple}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost,http://localhost:8000}
+      - SLACK_FEATURE_REQUEST_WEBHOOK_URL=${SLACK_FEATURE_REQUEST_WEBHOOK_URL}
+    volumes:
+      - roadmap-data:/app/data
+      - ./backend/config:/app/config:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    network_mode: host
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    network_mode: host
+
+volumes:
+  roadmap-data:
+    driver: local

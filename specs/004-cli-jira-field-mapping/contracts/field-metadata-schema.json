@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://weni.ai/schemas/custom-field-metadata.json",
+  "title": "JIRA Custom Field Metadata",
+  "description": "Schema for custom field metadata structure used in CLI field mapping",
+  "type": "object",
+  "required": ["id", "name", "field_type", "is_custom", "project_key"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^customfield_\\d{5,}$",
+      "description": "JIRA custom field ID",
+      "examples": ["customfield_10001", "customfield_14619"]
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "description": "Human-readable field name as configured in JIRA",
+      "examples": ["Roadmap Title", "Public Description", "Release Date"]
+    },
+    "field_type": {
+      "type": "string",
+      "description": "JIRA custom field type identifier",
+      "examples": [
+        "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+        "com.atlassian.jira.plugin.system.customfieldtypes:textarea",
+        "com.atlassian.jira.plugin.system.customfieldtypes:url",
+        "com.atlassian.jira.plugin.system.customfieldtypes:datepicker"
+      ]
+    },
+    "is_custom": {
+      "type": "boolean",
+      "const": true,
+      "description": "Must be true (only custom fields supported, not system fields)"
+    },
+    "project_key": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9]{1,9}$",
+      "description": "JIRA project key this field was retrieved from",
+      "examples": ["NEXUS", "FLOW", "CONNECT"]
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional field description from JIRA",
+      "default": ""
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "id": "customfield_10101",
+      "name": "Roadmap Title",
+      "field_type": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+      "is_custom": true,
+      "project_key": "NEXUS",
+      "description": "Public-facing title for roadmap display"
+    },
+    {
+      "id": "customfield_10102",
+      "name": "Roadmap Description",
+      "field_type": "com.atlassian.jira.plugin.system.customfieldtypes:textarea",
+      "is_custom": true,
+      "project_key": "NEXUS",
+      "description": "Public-facing description for roadmap display"
+    },
+    {
+      "id": "customfield_10103",
+      "name": "Image URL 1",
+      "field_type": "com.atlassian.jira.plugin.system.customfieldtypes:url",
+      "is_custom": true,
+      "project_key": "NEXUS",
+      "description": "First image URL for roadmap display"
+    }
+  ]
+}

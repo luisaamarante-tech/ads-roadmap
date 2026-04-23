@@ -1,0 +1,5 @@
+{
+  "version": "1.0",
+  "defaultIssueTypeName": "Task",
+  "note": "Module routing is now DYNAMIC - automatically built from existing roadmap items. Modules are mapped to Jira projects by analyzing the issue key prefix (e.g., 'Agent Builder' module from NEXUS-123 → NEXUS project). No manual configuration needed!"
+}

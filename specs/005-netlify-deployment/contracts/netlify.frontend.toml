@@ -1,0 +1,145 @@
+# Netlify Configuration: Frontend
+# This file should be copied to: frontend/netlify.toml
+
+# =============================================================================
+# BUILD SETTINGS
+# =============================================================================
+[build]
+  # Base directory for build (relative to repository root)
+  base = "frontend"
+  
+  # Build command - runs from base directory
+  command = "npm ci && npm run build"
+  
+  # Directory to publish (relative to base)
+  publish = "dist"
+  
+  # Ignore builds if frontend hasn't changed
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- ."
+
+# Build environment variables (available during build)
+[build.environment]
+  NODE_VERSION = "20"
+  NPM_VERSION = "10"
+
+# =============================================================================
+# CONTEXT-SPECIFIC SETTINGS
+# =============================================================================
+
+# Production context (main branch)
+[context.production]
+  [context.production.environment]
+    # Backend API endpoint for production
+    VITE_API_BASE_URL = "https://roadmap-api.weni.ai"
+    VITE_APP_NAME = "Weni Public Roadmap"
+    VITE_APP_VERSION = "1.0.0"
+    NODE_ENV = "production"
+
+# Deploy Preview context (pull requests)
+[context.deploy-preview]
+  # Override build command to include preview banner
+  command = "npm ci && npm run build"
+  
+  [context.deploy-preview.environment]
+    # Use preview backend or mock data
+    VITE_API_BASE_URL = "https://roadmap-api-preview.netlify.app"
+    VITE_APP_NAME = "Weni Roadmap (Preview)"
+    NODE_ENV = "staging"
+
+# Branch Deploy context (feature branches)
+[context.branch-deploy]
+  [context.branch-deploy.environment]
+    VITE_API_BASE_URL = "https://roadmap-api-staging.netlify.app"
+    VITE_APP_NAME = "Weni Roadmap (Staging)"
+    NODE_ENV = "development"
+
+# Specific branch override (develop branch gets staging config)
+[context.develop]
+  [context.develop.environment]
+    VITE_API_BASE_URL = "https://roadmap-api-staging.netlify.app"
+    NODE_ENV = "staging"
+
+# =============================================================================
+# REDIRECTS & REWRITES
+# =============================================================================
+
+# SPA fallback - all routes handled by client-side router
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = false
+
+# Redirect old URLs to new routes (if applicable)
+# [[redirects]]
+#   from = "/old-path"
+#   to = "/new-path"
+#   status = 301
+
+# API proxy for local development (optional)
+# Uncomment if you want to proxy API requests during local Netlify dev
+# [[redirects]]
+#   from = "/api/*"
+#   to = "https://roadmap-api.weni.ai/api/:splat"
+#   status = 200
+#   force = false
+
+# =============================================================================
+# HEADERS
+# =============================================================================
+
+# Security headers for all pages
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Prevent clickjacking
+    X-Frame-Options = "DENY"
+    # Prevent MIME sniffing
+    X-Content-Type-Options = "nosniff"
+    # Referrer policy
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    # Permissions policy (restrict features)
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+# Cache static assets aggressively
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Cache index.html with short TTL (always revalidate)
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# =============================================================================
+# PLUGINS (optional)
+# =============================================================================
+
+# Lighthouse CI plugin for performance monitoring
+# [[plugins]]
+#   package = "@netlify/plugin-lighthouse"
+#   [plugins.inputs]
+#     output_path = "reports/lighthouse.html"
+
+# Bundle analyzer plugin
+# [[plugins]]
+#   package = "netlify-plugin-bundle-analyzer"
+
+# =============================================================================
+# DEV SETTINGS (local development with Netlify CLI)
+# =============================================================================
+[dev]
+  command = "npm run dev"
+  port = 5173
+  publish = "dist"
+  autoLaunch = false
+  framework = "#vite"
+  
+  # Proxy API requests to local backend during development
+  # [[dev.redirects]]
+  #   from = "/api/*"
+  #   to = "http://localhost:5000/api/:splat"
+  #   status = 200
+

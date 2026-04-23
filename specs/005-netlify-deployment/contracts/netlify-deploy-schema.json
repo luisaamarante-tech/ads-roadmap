@@ -1,0 +1,353 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://weni.ai/schemas/netlify-deploy-config.json",
+  "title": "Netlify Deployment Configuration",
+  "description": "Schema for validating Netlify deployment configuration (netlify.toml structure)",
+  "type": "object",
+  "required": ["build"],
+  "properties": {
+    "build": {
+      "type": "object",
+      "description": "Build configuration",
+      "required": ["command", "publish"],
+      "properties": {
+        "base": {
+          "type": "string",
+          "description": "Base directory for build (relative to repo root)",
+          "examples": ["frontend", "backend", "."]
+        },
+        "command": {
+          "type": "string",
+          "description": "Command to execute build",
+          "minLength": 1,
+          "examples": [
+            "npm run build",
+            "pip install -r requirements.txt -t ./python_modules"
+          ]
+        },
+        "publish": {
+          "type": "string",
+          "description": "Directory to publish (relative to base)",
+          "minLength": 1,
+          "examples": ["dist", "build", "."]
+        },
+        "ignore": {
+          "type": "string",
+          "description": "Command to determine if build should run (exit 0 = skip, exit 1 = build)",
+          "examples": [
+            "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- ."
+          ]
+        },
+        "environment": {
+          "type": "object",
+          "description": "Build-time environment variables",
+          "patternProperties": {
+            "^[A-Z][A-Z0-9_]*$": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "functions": {
+      "type": "object",
+      "description": "Serverless functions configuration",
+      "properties": {
+        "directory": {
+          "type": "string",
+          "description": "Directory containing function files",
+          "examples": ["netlify/functions", "functions"]
+        },
+        "node_bundler": {
+          "type": "string",
+          "enum": ["esbuild", "zisi"],
+          "description": "Bundler for Node.js functions"
+        },
+        "included_files": {
+          "type": "array",
+          "description": "Glob patterns for files to include in function bundles",
+          "items": {
+            "type": "string"
+          },
+          "examples": [["python_modules/**", "app/**", "config/**"]]
+        },
+        "excluded_patterns": {
+          "type": "array",
+          "description": "Glob patterns for files to exclude from function bundles",
+          "items": {
+            "type": "string"
+          },
+          "examples": [["tests/**", "*.pyc", "__pycache__/**"]]
+        }
+      },
+      "additionalProperties": true
+    },
+    "context": {
+      "type": "object",
+      "description": "Context-specific configuration overrides",
+      "properties": {
+        "production": {
+          "$ref": "#/definitions/contextConfig"
+        },
+        "deploy-preview": {
+          "$ref": "#/definitions/contextConfig"
+        },
+        "branch-deploy": {
+          "$ref": "#/definitions/contextConfig"
+        }
+      },
+      "patternProperties": {
+        "^[a-z0-9-]+$": {
+          "$ref": "#/definitions/contextConfig",
+          "description": "Branch-specific configuration (branch name as key)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "redirects": {
+      "type": "array",
+      "description": "Redirect and rewrite rules",
+      "items": {
+        "$ref": "#/definitions/redirectRule"
+      }
+    },
+    "headers": {
+      "type": "array",
+      "description": "Custom HTTP headers",
+      "items": {
+        "$ref": "#/definitions/headerRule"
+      }
+    },
+    "plugins": {
+      "type": "array",
+      "description": "Netlify build plugins",
+      "items": {
+        "type": "object",
+        "required": ["package"],
+        "properties": {
+          "package": {
+            "type": "string",
+            "description": "Plugin npm package name"
+          },
+          "inputs": {
+            "type": "object",
+            "description": "Plugin configuration inputs"
+          }
+        }
+      }
+    },
+    "dev": {
+      "type": "object",
+      "description": "Local development configuration (netlify dev)",
+      "properties": {
+        "command": {
+          "type": "string",
+          "description": "Command to start local dev server"
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535,
+          "description": "Port for Netlify dev proxy"
+        },
+        "targetPort": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535,
+          "description": "Port where local server runs"
+        },
+        "publish": {
+          "type": "string",
+          "description": "Directory to serve in dev mode"
+        },
+        "autoLaunch": {
+          "type": "boolean",
+          "description": "Auto-open browser on dev server start"
+        },
+        "framework": {
+          "type": "string",
+          "description": "Framework auto-detection override"
+        },
+        "functions": {
+          "type": "string",
+          "description": "Functions directory for local testing"
+        }
+      }
+    }
+  },
+  "additionalProperties": true,
+  "definitions": {
+    "contextConfig": {
+      "type": "object",
+      "description": "Configuration overrides for specific deployment context",
+      "properties": {
+        "command": {
+          "type": "string",
+          "description": "Override build command for this context"
+        },
+        "publish": {
+          "type": "string",
+          "description": "Override publish directory for this context"
+        },
+        "functions": {
+          "type": "object",
+          "description": "Override functions configuration"
+        },
+        "environment": {
+          "type": "object",
+          "description": "Context-specific environment variables",
+          "patternProperties": {
+            "^[A-Z][A-Z0-9_]*$": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "redirectRule": {
+      "type": "object",
+      "description": "URL redirect or rewrite rule",
+      "required": ["from", "to"],
+      "properties": {
+        "from": {
+          "type": "string",
+          "description": "Source path pattern (supports wildcards and splats)",
+          "examples": ["/*", "/api/*", "/old-path"]
+        },
+        "to": {
+          "type": "string",
+          "description": "Destination path or URL",
+          "examples": ["/index.html", "/.netlify/functions/api", "https://example.com/:splat"]
+        },
+        "status": {
+          "type": "integer",
+          "enum": [200, 301, 302, 303, 307, 308, 404, 410, 451],
+          "description": "HTTP status code",
+          "default": 301
+        },
+        "force": {
+          "type": "boolean",
+          "description": "Force redirect even if file exists at 'from' path",
+          "default": false
+        },
+        "query": {
+          "type": "object",
+          "description": "Query parameter conditions for redirect",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "conditions": {
+          "type": "object",
+          "description": "Advanced redirect conditions (country, language, role, etc.)",
+          "properties": {
+            "Country": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Z]{2}$"
+              }
+            },
+            "Language": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "Role": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "signed": {
+          "type": "string",
+          "description": "JWT role for signed URL redirect"
+        },
+        "headers": {
+          "type": "object",
+          "description": "Additional headers for this redirect",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "headerRule": {
+      "type": "object",
+      "description": "Custom HTTP headers for path pattern",
+      "required": ["for", "values"],
+      "properties": {
+        "for": {
+          "type": "string",
+          "description": "Path pattern to apply headers",
+          "examples": ["/*", "/assets/*", "/api/*"]
+        },
+        "values": {
+          "type": "object",
+          "description": "Header key-value pairs",
+          "patternProperties": {
+            "^[A-Za-z-]+$": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "examples": [
+            {
+              "Cache-Control": "public, max-age=31536000, immutable",
+              "X-Frame-Options": "DENY"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "examples": [
+    {
+      "build": {
+        "base": "frontend",
+        "command": "npm ci && npm run build",
+        "publish": "dist",
+        "environment": {
+          "NODE_VERSION": "20"
+        }
+      },
+      "context": {
+        "production": {
+          "environment": {
+            "VITE_API_BASE_URL": "https://api.production.com"
+          }
+        },
+        "deploy-preview": {
+          "environment": {
+            "VITE_API_BASE_URL": "https://api.staging.com"
+          }
+        }
+      },
+      "redirects": [
+        {
+          "from": "/*",
+          "to": "/index.html",
+          "status": 200
+        }
+      ],
+      "headers": [
+        {
+          "for": "/*",
+          "values": {
+            "X-Frame-Options": "DENY",
+            "X-Content-Type-Options": "nosniff"
+          }
+        }
+      ]
+    }
+  ]
+}
+

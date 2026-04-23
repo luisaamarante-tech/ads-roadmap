@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Feature Request Routing Configuration",
+  "description": "Maps roadmap modules to Jira project destinations for feature requests",
+  "type": "object",
+  "required": ["version", "defaultIssueTypeName", "routes"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$",
+      "description": "Configuration format version"
+    },
+    "defaultIssueTypeName": {
+      "type": "string",
+      "description": "Default Jira issue type to use when creating feature requests",
+      "minLength": 1
+    },
+    "routes": {
+      "type": "array",
+      "description": "List of module-to-Jira routing rules",
+      "items": {
+        "$ref": "#/definitions/RoutingRule"
+      },
+      "minItems": 1
+    }
+  },
+  "definitions": {
+    "RoutingRule": {
+      "type": "object",
+      "required": ["moduleId", "jiraProjectKey"],
+      "properties": {
+        "moduleId": {
+          "type": "string",
+          "description": "Roadmap module identifier (slug)",
+          "pattern": "^[a-z0-9-]+$",
+          "minLength": 1
+        },
+        "jiraProjectKey": {
+          "type": "string",
+          "description": "Target Jira project key",
+          "pattern": "^[A-Z]+$",
+          "minLength": 1,
+          "maxLength": 10
+        },
+        "jiraIssueTypeName": {
+          "type": "string",
+          "description": "Optional issue type override for this route",
+          "minLength": 1
+        },
+        "labels": {
+          "type": "array",
+          "description": "Optional labels to apply to created issues",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

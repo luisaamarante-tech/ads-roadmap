@@ -1,0 +1,121 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "JIRA Projects Schema Update - Roadmap Likes Field",
+  "description": "Updated schema showing the addition of the roadmap_likes field to the project configuration",
+  "type": "object",
+  "required": ["version", "projects"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$",
+      "description": "Configuration format version"
+    },
+    "projects": {
+      "type": "object",
+      "patternProperties": {
+        "^[A-Z][A-Z0-9]{1,9}$": {
+          "type": "object",
+          "required": [
+            "public_roadmap",
+            "roadmap_status",
+            "module",
+            "release_year",
+            "release_quarter",
+            "release_month",
+            "documentation_url",
+            "roadmap_title",
+            "roadmap_description",
+            "roadmap_image_url_1",
+            "roadmap_image_url_2",
+            "roadmap_image_url_3",
+            "roadmap_image_url_4",
+            "roadmap_likes"
+          ],
+          "properties": {
+            "public_roadmap": {
+              "type": "string",
+              "pattern": "^customfield_\\d{5,}$"
+            },
+            "roadmap_status": {
+              "type": "string",
+              "pattern": "^customfield_\\d{5,}$"
+            },
+            "module": {
+              "type": "string",
+              "pattern": "^customfield_\\d{5,}$"
+            },
+            "release_year": {
+              "type": "string",
+              "pattern": "^customfield_\\d{5,}$"
+            },
+            "release_quarter": {
+              "type": "string",
+              "pattern": "^customfield_\\d{5,}$"
+            },
+            "release_month": {
+              "type": "string",
+              "pattern": "^customfield_\\d{5,}$"
+            },
+            "documentation_url": {
+              "type": "string",
+              "pattern": "^customfield_\\d{5,}$"
+            },
+            "roadmap_title": {
+              "type": "string",
+              "pattern": "^customfield_\\d{5,}$"
+            },
+            "roadmap_description": {
+              "type": "string",
+              "pattern": "^customfield_\\d{5,}$"
+            },
+            "roadmap_image_url_1": {
+              "type": "string",
+              "pattern": "^customfield_\\d{5,}$"
+            },
+            "roadmap_image_url_2": {
+              "type": "string",
+              "pattern": "^customfield_\\d{5,}$"
+            },
+            "roadmap_image_url_3": {
+              "type": "string",
+              "pattern": "^customfield_\\d{5,}$"
+            },
+            "roadmap_image_url_4": {
+              "type": "string",
+              "pattern": "^customfield_\\d{5,}$"
+            },
+            "roadmap_likes": {
+              "type": "string",
+              "pattern": "^customfield_\\d{5,}$",
+              "description": "Custom field ID for storing the number of likes an epic has received"
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "version": "1.0",
+      "projects": {
+        "NEXUS": {
+          "public_roadmap": "customfield_14699",
+          "roadmap_status": "customfield_14698",
+          "module": "customfield_14622",
+          "release_year": "customfield_14623",
+          "release_quarter": "customfield_14624",
+          "release_month": "customfield_14625",
+          "documentation_url": "customfield_14626",
+          "roadmap_title": "customfield_14697",
+          "roadmap_description": "customfield_14696",
+          "roadmap_image_url_1": "customfield_14695",
+          "roadmap_image_url_2": "customfield_14694",
+          "roadmap_image_url_3": "customfield_14693",
+          "roadmap_image_url_4": "customfield_14692",
+          "roadmap_likes": "customfield_14929"
+        }
+      }
+    }
+  ]
+}

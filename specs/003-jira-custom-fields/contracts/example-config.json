@@ -1,0 +1,30 @@
+{
+  "version": "1.0",
+  "projects": {
+    "WENI": {
+      "roadmap_title": "customfield_10101",
+      "roadmap_description": "customfield_10102",
+      "roadmap_image_url_1": "customfield_10103",
+      "roadmap_image_url_2": "customfield_10104",
+      "roadmap_image_url_3": "customfield_10105",
+      "roadmap_image_url_4": "customfield_10106"
+    },
+    "FLOWS": {
+      "roadmap_title": "customfield_10201",
+      "roadmap_description": "customfield_10202",
+      "roadmap_image_url_1": "customfield_10203",
+      "roadmap_image_url_2": "customfield_10204",
+      "roadmap_image_url_3": "customfield_10205",
+      "roadmap_image_url_4": "customfield_10206"
+    },
+    "INTG": {
+      "roadmap_title": "customfield_10301",
+      "roadmap_description": "customfield_10302",
+      "roadmap_image_url_1": "customfield_10303",
+      "roadmap_image_url_2": "customfield_10304",
+      "roadmap_image_url_3": "customfield_10305",
+      "roadmap_image_url_4": "customfield_10306"
+    }
+  }
+}
+

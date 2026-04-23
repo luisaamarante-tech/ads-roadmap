@@ -1,0 +1,88 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vtex-ads-roadmap-backend"
+version = "1.0.0"
+description = "Backend API for VTEX Ads Public Roadmap"
+requires-python = ">=3.11"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+# =============================================================================
+# BLACK - Code Formatting
+# Constitution: "Follow PEP 8 for formatting, naming, and layout"
+# =============================================================================
+[tool.black]
+line-length = 88
+target-version = ["py311"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+    venv
+    | __pycache__
+    | \.git
+    | data
+)/
+'''
+
+# =============================================================================
+# ISORT - Import Sorting
+# Constitution: "Group imports: (1) standard library, (2) third-party, (3) local"
+# =============================================================================
+[tool.isort]
+profile = "black"
+line_length = 88
+known_first_party = ["app"]
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+skip = ["venv", "__pycache__"]
+
+# =============================================================================
+# PYTEST - Testing Configuration
+# Constitution: "Testing is MANDATORY and MUST achieve minimum 80% code coverage"
+# =============================================================================
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_functions = ["test_*"]
+addopts = [
+    "--verbose",
+    "--cov=app",
+    "--cov-report=term-missing",
+    "--cov-report=html:coverage_html",
+    "--cov-fail-under=80",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+
+# =============================================================================
+# COVERAGE - Code Coverage Settings
+# Constitution: "minimum 80% code coverage"
+# =============================================================================
+[tool.coverage.run]
+source = ["app"]
+branch = true
+omit = [
+    "*/__pycache__/*",
+    "*/tests/*",
+    "*/.venv/*",
+    "*/venv/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+fail_under = 80
+show_missing = true
+
+[tool.coverage.html]
+directory = "coverage_html"

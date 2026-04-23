@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(robocopy \"vtex-ads-roadmap\" \"ads-roadmap\" /E /XD \".git\" \"node_modules\" \"__pycache__\" \".pytest_cache\" \"dist\" \"venv\" /XF \"*.pyc\" \"coverage.xml\" \".coverage\")"
+    ]
+  }
+}

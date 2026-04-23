@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "projects": {
+    "VA": {
+      "public_roadmap": "customfield_XXXXX",
+      "roadmap_status": "customfield_XXXXX",
+      "module": "customfield_XXXXX",
+      "release_year": "customfield_XXXXX",
+      "release_quarter": "customfield_XXXXX",
+      "release_month": "customfield_XXXXX",
+      "documentation_url": "customfield_XXXXX",
+      "roadmap_title": "customfield_XXXXX",
+      "roadmap_description": "customfield_XXXXX",
+      "roadmap_image_url_1": "customfield_XXXXX",
+      "roadmap_image_url_2": "customfield_XXXXX",
+      "roadmap_image_url_3": "customfield_XXXXX",
+      "roadmap_image_url_4": "customfield_XXXXX",
+      "roadmap_likes": "customfield_XXXXX"
+    }
+  }
+}

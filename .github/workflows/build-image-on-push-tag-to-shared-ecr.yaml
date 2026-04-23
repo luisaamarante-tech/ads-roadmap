@@ -1,0 +1,66 @@
+name: Build, push and deploy
+
+on:
+  push:
+    tags:
+      - '*.*.*-develop'
+      - '*.*.*-staging'
+      - '*.*.*'
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      repository_name: ${{ steps.setup.outputs.repository_name }}
+    steps:
+      - name: Setup outputs
+        id: setup
+        run: |
+          export GITHUB_REPOSITORY_NAME="${GITHUB_REPOSITORY#$GITHUB_REPOSITORY_OWNER/}"
+          {
+            echo "repository_name=${GITHUB_REPOSITORY_NAME}"
+          } | tee -a "${GITHUB_OUTPUT}"
+
+          {
+            echo "### Workflow Outputs"
+            echo "| Variable        | Description     |"
+            echo "| --------------- | --------------- |"
+            echo "| repository_name | Repository name |"
+          } | tee -a "${GITHUB_STEP_SUMMARY}"
+
+          echo "### ⚠️ Frontend Cache Policy"
+          echo "Frontend builds will ALWAYS use a fresh build (no Docker layer cache for source files)."
+          echo "This ensures all changes, especially public files like webchat-audio.umd.js, are always included."
+
+  call-workflow-backend:
+    uses: weni-ai/actions-workflows/.github/workflows/reusable-workflow.yaml@main
+    needs:
+      - setup
+    with:
+      image_repository: "${{ needs.setup.outputs.repository_name }}"
+      target_application: "${{ needs.setup.outputs.repository_name }}"
+      dockerfile: "backend/docker/Dockerfile"
+      build_context: "backend/"
+      target_repository: weni-ai/kubernetes-manifests
+      target_patch_file: deployment-backend-image.json
+      image_tag_prefix: backend-
+    secrets: inherit
+
+  call-workflow-frontend:
+    uses: weni-ai/actions-workflows/.github/workflows/reusable-workflow.yaml@main
+    needs:
+      - setup
+    with:
+      image_repository: "${{ needs.setup.outputs.repository_name }}"
+      target_application: "${{ needs.setup.outputs.repository_name }}"
+      dockerfile: "frontend/docker/Dockerfile"
+      build_context: "frontend/"
+      kludge_webapp_secret_enable: true
+      target_repository: weni-ai/kubernetes-manifests
+      target_patch_file: deployment-frontend-image.json
+      image_tag_prefix: webapp-
+      # Always invalidate cache for frontend builds to ensure all changes are included
+      # Using both timestamp and SHA to guarantee cache invalidation
+      build_args: |
+        CACHE_BUST=${{ github.sha }}-${{ github.run_number }}-${{ github.run_attempt }}
+    secrets: inherit

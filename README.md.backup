@@ -1,0 +1,360 @@
+# Weni Public Roadmap
+
+A public-facing roadmap page for Weni customers and stakeholders, displaying upcoming and delivered features synchronized from JIRA Epics.
+
+## Overview
+
+- **Frontend**: Vue.js 3 with TypeScript and Weni Design System (Unnnic)
+- **Backend**: Flask with Python 3.11
+- **Data Source**: JIRA Cloud API (synchronized via scheduled background job)
+
+## Features
+
+- 📋 View roadmap items by delivery status (Delivered, Now, Next, Future)
+- 🔍 Filter by year, quarter, and module/product
+- 📖 Expandable cards with full descriptions and images
+- 🔗 Documentation links for each feature
+- 📱 Responsive design for all devices
+- 🔄 Automatic sync with JIRA (configurable interval)
+- 💾 Fallback cache for JIRA outages
+
+## Quick Start
+
+### Prerequisites
+
+- Python 3.11+
+- Node.js 20+
+- Docker & Docker Compose (optional, for containerized deployment)
+
+### Local Development
+
+#### Backend Setup
+
+```bash
+cd backend
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: .\venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Copy environment template
+cp .env.example .env
+
+# Edit .env with your JIRA credentials
+# See "JIRA Configuration" section below
+
+# Run development server
+flask run --port 5000
+```
+
+#### Frontend Setup
+
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+
+# Copy environment template
+cp .env.example .env
+
+# Run development server
+npm run dev
+```
+
+The frontend will be available at http://localhost:5173 and will proxy API requests to the backend.
+
+### Docker Deployment
+
+```bash
+# Copy environment variables
+cp backend/.env.example .env
+
+# Edit .env with your JIRA credentials
+
+# Build and start services
+docker-compose up --build
+
+# Access the roadmap at http://localhost
+```
+
+### Netlify Deployment (Production)
+
+**Status**: ✅ Ready for deployment
+
+Both frontend and backend are configured for seamless deployment to Netlify with automated CI/CD.
+
+#### Quick Deploy
+
+**Frontend**:
+```bash
+cd frontend
+netlify init
+netlify deploy --prod
+```
+
+**Backend**:
+```bash
+cd backend
+netlify init
+netlify deploy --prod
+```
+
+#### Configuration
+
+- **Frontend**: Static site with SPA routing
+  - Build command: `npm ci && npm run build`
+  - Publish directory: `dist`
+  - Configuration: `frontend/netlify.toml`
+
+- **Backend**: Serverless functions
+  - Build command: `pip install -r requirements-prod.txt -t ./python_modules`
+  - Functions directory: `netlify/functions`
+  - Configuration: `backend/netlify.toml`
+
+#### Environment Variables
+
+Set in Netlify UI (Site Settings > Environment Variables):
+
+**Backend** (mark JIRA_API_TOKEN as secret):
+- `JIRA_BASE_URL`, `JIRA_EMAIL`, `JIRA_API_TOKEN`
+- `FLASK_ENV=production`, `LOG_LEVEL=INFO`
+
+**Frontend**:
+- `VITE_API_BASE_URL` (your backend Netlify URL)
+- `VITE_APP_NAME`, `VITE_APP_VERSION`
+
+#### Automated Deployments
+
+- **Production**: Push to `main` branch → Auto-deploy
+- **Preview**: Create PR → Deploy preview with unique URL
+- **Branch**: Push to feature branch → Branch deploy
+
+#### Documentation
+
+Complete deployment guide: [`specs/005-netlify-deployment/quickstart.md`](specs/005-netlify-deployment/quickstart.md)
+
+Additional resources:
+- [Deployment URLs](specs/005-netlify-deployment/DEPLOYMENT_URLS.md)
+- [CI/CD Setup](specs/005-netlify-deployment/CI_CD_SETUP.md)
+- [Environment Variables Checklist](specs/005-netlify-deployment/ENV_VARIABLES_CHECKLIST.md)
+- [Rollback Runbook](specs/005-netlify-deployment/ROLLBACK_RUNBOOK.md)
+
+## JIRA Configuration
+
+The backend needs access to your JIRA instance to sync public roadmap items.
+
+### Required Environment Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `JIRA_BASE_URL` | Your Atlassian domain | `https://yourcompany.atlassian.net` |
+| `JIRA_EMAIL` | Service account email | `roadmap-sync@company.com` |
+| `JIRA_API_TOKEN` | API token for the account | `ATATT3x...` |
+
+### Project Configuration
+
+Projects and their custom field mappings are configured in `backend/config/jira_projects.json`:
+
+```json
+{
+  "version": "1.0",
+  "projects": {
+    "NEXUS": {
+      "public_roadmap": "customfield_14699",
+      "roadmap_status": "customfield_14698",
+      "module": "customfield_14622",
+      ...
+    }
+  }
+}
+```
+
+To add a new project, use the CLI to auto-detect and map fields:
+
+```bash
+cd backend
+flask jira map-fields NEW_PROJECT
+```
+
+This will:
+1. Query an Epic from the project to find available custom fields
+2. Auto-match field names to roadmap attributes
+3. Save the configuration to `jira_projects.json`
+
+### Sync Settings
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `SYNC_INTERVAL_MINUTES` | How often to sync from JIRA | `5` |
+| `CACHE_TYPE` | Cache backend (`simple` or `redis`) | `simple` |
+| `REDIS_URL` | Redis URL for production caching | - |
+
+## API Endpoints
+
+| Endpoint | Description |
+|----------|-------------|
+| `GET /api/v1/health` | Service health check |
+| `GET /api/v1/roadmap/items` | List items with filters |
+| `GET /api/v1/roadmap/items/{id}` | Get single item |
+| `GET /api/v1/roadmap/modules` | List available modules |
+| `GET /api/v1/roadmap/stats` | Get item counts by status |
+
+### Query Parameters for `/roadmap/items`
+
+- `status`: DELIVERED, NOW, NEXT, or FUTURE
+- `year`: Filter by release year (e.g., 2025)
+- `quarter`: Filter by quarter (Q1, Q2, Q3, Q4)
+- `module`: Filter by module ID (slug)
+
+## Project Structure
+
+```
+weni-roadmap/
+├── backend/
+│   ├── app/
+│   │   ├── models/         # Data models (RoadmapItem, Module)
+│   │   ├── routes/         # API endpoints
+│   │   └── services/       # Business logic (JIRA client, sync, cache)
+│   ├── requirements.txt
+│   ├── Dockerfile
+│   └── run.py
+├── frontend/
+│   ├── src/
+│   │   ├── components/     # Vue components
+│   │   ├── views/          # Page components
+│   │   ├── services/       # API client
+│   │   ├── types/          # TypeScript types
+│   │   └── router/         # Vue Router config
+│   ├── package.json
+│   └── Dockerfile
+├── docker-compose.yml
+└── README.md
+```
+
+## Security
+
+- **No authentication required** for public roadmap access
+- JIRA credentials are **server-side only** (never exposed to frontend)
+- Only fields marked as public are synced (allowlist-based extraction)
+- Rate limiting: 100 requests/minute per IP
+- CORS configured for allowed origins only
+
+## Development
+
+### Prerequisites
+
+- Python 3.11+
+- Node.js 20+
+- Pre-commit (for Git hooks)
+
+### Setup Development Environment
+
+```bash
+# Install pre-commit hooks
+pip install pre-commit
+pre-commit install
+
+# Backend dependencies
+cd backend
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# Frontend dependencies
+cd ../frontend
+npm install
+```
+
+### Code Quality
+
+This project follows the [Weni Roadmap Constitution](.specify/memory/constitution.md) for code quality standards:
+
+- **Python**: PEP 8, Black formatting, isort imports, Flake8 linting
+- **TypeScript/Vue**: ESLint, Prettier, Stylelint
+- **CSS**: BEM methodology, Unnnic Design System tokens
+- **Commits**: Conventional Commits format
+
+### Running Tests
+
+```bash
+# Backend (requires 80% coverage)
+cd backend
+pytest --cov=app --cov-report=term-missing
+
+# Frontend (requires 80% coverage)
+cd frontend
+npm run test:coverage
+```
+
+### Linting & Formatting
+
+```bash
+# Backend
+cd backend
+black app/ tests/
+isort app/ tests/
+flake8 app/ tests/
+
+# Frontend
+cd frontend
+npm run lint
+npm run format
+npm run stylelint
+```
+
+### Pre-commit Hooks
+
+Pre-commit hooks run automatically on every commit:
+- Python: Black, isort, Flake8
+- Frontend: ESLint, Prettier, Stylelint
+- Conventional commits validation
+
+To run manually:
+```bash
+pre-commit run --all-files
+```
+
+### Building for Production
+
+```bash
+# Backend
+docker build -t weni-roadmap-backend ./backend
+
+# Frontend
+docker build -t weni-roadmap-frontend ./frontend
+```
+
+## Contributing
+
+1. Create a feature branch from `develop`
+2. Make changes following the code quality standards
+3. Ensure all tests pass with 80%+ coverage
+4. Submit a PR with conventional commit messages
+
+### Commit Message Format
+
+```
+<type>(<scope>): <description>
+
+[optional body]
+
+[optional footer]
+```
+
+Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`
+
+Example:
+```
+feat(filters): add module filter dropdown
+
+- Added UnnnicSelectSmart component for module selection
+- Connected to roadmap API for dynamic module list
+```
+
+## License
+
+Copyright © 2024 Weni. All rights reserved.

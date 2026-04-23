@@ -1,0 +1,453 @@
+openapi: 3.0.3
+info:
+  title: Weni Public Roadmap API
+  description: |
+    API for the Weni Public Roadmap page. Provides read-only access to
+    publicly published roadmap items synchronized from JIRA.
+
+    **Security Note**: This API does not require authentication as it only
+    exposes pre-filtered public data. All sensitive JIRA data is filtered
+    at the sync layer.
+  version: 1.0.0
+  contact:
+    name: Weni Engineering
+    url: https://weni.ai
+
+servers:
+  - url: https://roadmap-api.weni.ai/api/v1
+    description: Production server
+  - url: http://localhost:5000/api/v1
+    description: Development server
+
+tags:
+  - name: Roadmap
+    description: Public roadmap item operations
+  - name: Health
+    description: Service health and metadata
+
+paths:
+  /roadmap/items:
+    get:
+      summary: Get roadmap items
+      description: |
+        Returns all publicly visible roadmap items. Supports filtering by
+        status, year, quarter, and module.
+      operationId: getRoadmapItems
+      tags:
+        - Roadmap
+      parameters:
+        - name: status
+          in: query
+          description: Filter by delivery status
+          required: false
+          schema:
+            $ref: '#/components/schemas/DeliveryStatus'
+        - name: year
+          in: query
+          description: Filter by release year
+          required: false
+          schema:
+            type: integer
+            minimum: 2020
+            maximum: 2030
+            example: 2025
+        - name: quarter
+          in: query
+          description: Filter by release quarter
+          required: false
+          schema:
+            $ref: '#/components/schemas/Quarter'
+        - name: module
+          in: query
+          description: Filter by module ID (slug)
+          required: false
+          schema:
+            type: string
+            example: flows
+      responses:
+        '200':
+          description: List of roadmap items
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoadmapItemsResponse'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /roadmap/items/{itemId}:
+    get:
+      summary: Get a single roadmap item
+      description: Returns detailed information for a specific roadmap item.
+      operationId: getRoadmapItem
+      tags:
+        - Roadmap
+      parameters:
+        - name: itemId
+          in: path
+          description: JIRA issue key (e.g., "PROJ-123")
+          required: true
+          schema:
+            type: string
+            pattern: '^[A-Z]+-\d+$'
+            example: PROJ-123
+      responses:
+        '200':
+          description: Roadmap item details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoadmapItem'
+        '404':
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /roadmap/modules:
+    get:
+      summary: Get available modules
+      description: |
+        Returns list of modules that have at least one public roadmap item.
+        Useful for populating filter dropdowns.
+      operationId: getModules
+      tags:
+        - Roadmap
+      responses:
+        '200':
+          description: List of modules
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModulesResponse'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /roadmap/stats:
+    get:
+      summary: Get roadmap statistics
+      description: |
+        Returns counts of items by status. Useful for displaying
+        counts on status tabs.
+      operationId: getRoadmapStats
+      tags:
+        - Roadmap
+      parameters:
+        - name: year
+          in: query
+          description: Filter stats by year
+          required: false
+          schema:
+            type: integer
+            example: 2025
+        - name: quarter
+          in: query
+          description: Filter stats by quarter
+          required: false
+          schema:
+            $ref: '#/components/schemas/Quarter'
+        - name: module
+          in: query
+          description: Filter stats by module
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Roadmap statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoadmapStatsResponse'
+
+  /health:
+    get:
+      summary: Health check
+      description: |
+        Returns service health status and sync metadata.
+        Includes information about when data was last synced from JIRA.
+      operationId: getHealth
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+components:
+  schemas:
+    DeliveryStatus:
+      type: string
+      enum:
+        - DELIVERED
+        - NOW
+        - NEXT
+        - FUTURE
+      description: |
+        - DELIVERED: Feature has been released
+        - NOW: Feature is currently in progress
+        - NEXT: Feature is planned for near-term
+        - FUTURE: Feature is planned for longer-term
+
+    Quarter:
+      type: string
+      enum:
+        - Q1
+        - Q2
+        - Q3
+        - Q4
+      description: Calendar quarter
+
+    RoadmapItem:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - status
+        - module
+        - releaseYear
+        - releaseQuarter
+        - lastSyncedAt
+      properties:
+        id:
+          type: string
+          description: JIRA issue key
+          pattern: '^[A-Z]+-\d+$'
+          example: PROJ-123
+        title:
+          type: string
+          description: Feature title
+          maxLength: 200
+          example: AI-powered customer insights dashboard
+        description:
+          type: string
+          description: Feature description (HTML or plain text)
+          maxLength: 5000
+          example: A new dashboard that provides AI-generated insights...
+        status:
+          $ref: '#/components/schemas/DeliveryStatus'
+        module:
+          type: string
+          description: Product module/area
+          example: Analytics
+        moduleId:
+          type: string
+          description: Module slug for filtering
+          example: analytics
+        releaseYear:
+          type: integer
+          description: Target release year
+          minimum: 2020
+          maximum: 2030
+          example: 2025
+        releaseQuarter:
+          $ref: '#/components/schemas/Quarter'
+        releaseMonth:
+          type: integer
+          description: Target release month (1-12)
+          minimum: 1
+          maximum: 12
+          nullable: true
+          example: 6
+        images:
+          type: array
+          description: Feature preview images (max 4)
+          maxItems: 4
+          items:
+            type: string
+            format: uri
+          example:
+            - https://example.com/image1.png
+            - https://example.com/image2.png
+        documentationUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: Link to documentation or "Learn More"
+          example: https://docs.weni.ai/features/insights-dashboard
+        lastSyncedAt:
+          type: string
+          format: date-time
+          description: When this item was last synced from JIRA
+          example: "2025-12-22T14:30:00Z"
+
+    RoadmapItemsResponse:
+      type: object
+      required:
+        - items
+        - total
+        - lastSyncedAt
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoadmapItem'
+        total:
+          type: integer
+          description: Total count of items matching filters
+          example: 42
+        lastSyncedAt:
+          type: string
+          format: date-time
+          description: When data was last synced from JIRA
+          example: "2025-12-22T14:30:00Z"
+        isStale:
+          type: boolean
+          description: True if last sync was more than 10 minutes ago
+          default: false
+
+    Module:
+      type: object
+      required:
+        - id
+        - name
+        - itemCount
+      properties:
+        id:
+          type: string
+          description: URL-safe slug
+          example: flows
+        name:
+          type: string
+          description: Display name
+          example: Flows
+        itemCount:
+          type: integer
+          description: Number of public items in this module
+          example: 15
+
+    ModulesResponse:
+      type: object
+      required:
+        - modules
+      properties:
+        modules:
+          type: array
+          items:
+            $ref: '#/components/schemas/Module'
+
+    RoadmapStatsResponse:
+      type: object
+      required:
+        - stats
+        - total
+      properties:
+        stats:
+          type: object
+          properties:
+            DELIVERED:
+              type: integer
+              example: 25
+            NOW:
+              type: integer
+              example: 8
+            NEXT:
+              type: integer
+              example: 12
+            FUTURE:
+              type: integer
+              example: 15
+        total:
+          type: integer
+          description: Total count across all statuses
+          example: 60
+        lastSyncedAt:
+          type: string
+          format: date-time
+          example: "2025-12-22T14:30:00Z"
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - lastSyncAt
+        - lastSyncStatus
+        - itemCount
+      properties:
+        status:
+          type: string
+          enum:
+            - healthy
+            - degraded
+            - unhealthy
+          description: Overall service health
+        lastSyncAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the last sync completed
+        lastSyncStatus:
+          type: string
+          enum:
+            - SUCCESS
+            - PARTIAL
+            - FAILED
+          nullable: true
+          description: Result of last sync operation
+        itemCount:
+          type: integer
+          description: Number of items in cache
+        errorMessage:
+          type: string
+          nullable: true
+          description: Error details if sync failed
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error code
+          example: NOT_FOUND
+        message:
+          type: string
+          description: Human-readable error message
+          example: Roadmap item not found
+        details:
+          type: object
+          additionalProperties: true
+          description: Additional error context
+
+  responses:
+    RateLimitExceeded:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: RATE_LIMIT_EXCEEDED
+            message: Too many requests. Please try again later.

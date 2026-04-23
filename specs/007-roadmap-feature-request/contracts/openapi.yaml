@@ -1,0 +1,198 @@
+openapi: 3.0.3
+info:
+  title: Weni Public Roadmap API - Feature Requests
+  description: |
+    Additions to the Weni Public Roadmap API to allow users to submit feature
+    requests from the roadmap page.
+  version: 1.0.0
+
+servers:
+  - url: https://roadmap-api.weni.ai/api/v1
+    description: Production server
+  - url: http://localhost:5000/api/v1
+    description: Development server
+
+tags:
+  - name: Feature Requests
+    description: Submit and route feature requests to Jira + notify leaders in Slack
+
+paths:
+  /roadmap/feature-request/modules:
+    get:
+      summary: Get requestable modules
+      description: |
+        Returns the list of modules that can be selected when submitting a feature request.
+        This list may be a filtered subset of the roadmap modules based on routing configuration.
+      operationId: getFeatureRequestModules
+      tags:
+        - Feature Requests
+      responses:
+        '200':
+          description: List of requestable modules
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureRequestModulesResponse'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /roadmap/feature-requests:
+    post:
+      summary: Submit a feature request
+      description: |
+        Creates a Jira issue in the backlog associated with the selected Module and notifies
+        `#weni-product-tech-squad-leaders` in Slack.
+      operationId: createFeatureRequest
+      tags:
+        - Feature Requests
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          description: |
+            Client-provided idempotency key to prevent duplicate Jira issue creation
+            on retries/double-submits.
+          required: true
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 128
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeatureRequestCreateRequest'
+      responses:
+        '201':
+          description: Feature request accepted and Jira issue created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureRequestCreateResponse'
+        '200':
+          description: Duplicate submission resolved via idempotency (previous result returned)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureRequestCreateResponse'
+        '400':
+          description: Invalid request payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error (includes Jira integration errors)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          example: INVALID_REQUEST
+        message:
+          type: string
+          example: Module is required
+
+    Module:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          description: URL-safe module identifier
+          example: nexus
+        name:
+          type: string
+          description: Display name
+          example: Nexus
+
+    FeatureRequestModulesResponse:
+      type: object
+      required:
+        - modules
+      properties:
+        modules:
+          type: array
+          items:
+            $ref: '#/components/schemas/Module'
+
+    FeatureRequestCreateRequest:
+      type: object
+      required:
+        - moduleId
+        - title
+        - description
+        - contactEmail
+      properties:
+        moduleId:
+          type: string
+          example: nexus
+        title:
+          type: string
+          minLength: 3
+          maxLength: 200
+          example: Add bulk export for reports
+        description:
+          type: string
+          minLength: 10
+          maxLength: 5000
+          example: |
+            Our team needs to export the reports list as CSV to share with stakeholders.
+        contactEmail:
+          type: string
+          format: email
+          example: user@example.com
+        website:
+          type: string
+          description: Honeypot field for bot mitigation. Must be empty.
+          example: ''
+
+    FeatureRequestCreateResponse:
+      type: object
+      required:
+        - success
+        - issueKey
+      properties:
+        success:
+          type: boolean
+          example: true
+        issueKey:
+          type: string
+          example: NEXUS-123
+        issueUrl:
+          type: string
+          example: https://your-org.atlassian.net/browse/NEXUS-123
+        leaderNotificationStatus:
+          type: string
+          description: Status of Slack notification attempt
+          enum:
+            - SENT
+            - PENDING
+            - FAILED
+          example: SENT
+        message:
+          type: string
+          example: Feature request submitted successfully
+

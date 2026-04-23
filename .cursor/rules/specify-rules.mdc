@@ -1,0 +1,51 @@
+# weni-roadmap Development Guidelines
+
+Auto-generated from all feature plans. Last updated: 2025-12-22
+
+## Active Technologies
+- Python 3.11+ (backend), TypeScript 5.3+ (frontend) (002-constitution-refactor)
+- N/A (caching layer only, no DB schema changes) (002-constitution-refactor)
+- Python 3.14 + Flask, requests, python-dotenv, dataclasses (003-jira-custom-fields)
+- JSON configuration file (`backend/config/jira_projects.json`), in-memory cache (003-jira-custom-fields)
+- Python 3.14 (existing backend) + Flask, Click (CLI), Requests (JIRA API), jsonschema (validation) (004-cli-jira-field-mapping)
+- File-based JSON configuration (`backend/config/jira_projects.json`) (004-cli-jira-field-mapping)
+- Backend: Python 3.14 | Frontend: TypeScript 5.x with Vue 3 + Backend: FastAPI, requests (JIRA API), pytest | Frontend: Vue 3, Axios, Vite, Vites (006-epic-likes-multi-select)
+- JIRA custom fields (no local database) (006-epic-likes-multi-select)
+- Python 3.11 (backend), TypeScript + Vue 3 (frontend) (007-roadmap-feature-request)
+- No database. Flask-Caching (Redis optional) + existing file fallback for roadmap cache; use cache for short-lived idempotency and Slack retry state. (007-roadmap-feature-request)
+- TypeScript 5.3, Vue 3.4 (008-epic-viewer-enhancements)
+- LocalStorage (for tracking user interactions if needed, already used for likes) (008-epic-viewer-enhancements)
+- Python 3.11+ (backend), Vue 3.4 + TypeScript 5.3 (frontend) (009-jira-text-formatting)
+- In-memory cache (Redis-based, existing architecture) (009-jira-text-formatting)
+- TypeScript 5.3+ with Vue 3.4+ + Vue 3.4, Vue Router 4.2, @weni/unnnic-system, Vite 5 (010-canvas-conversational-search)
+- N/A (uses existing roadmap service; no new persistence layer) (010-canvas-conversational-search)
+- Markdown documentation + N/A (documentation only) (011-readme-jira-docs)
+- N/A (no data storage changes) (011-readme-jira-docs)
+- TypeScript 5.3 / Vue 3.4 + `@weni/unnnic-system` (upgrade: `3.12.6-alpha` → `3.25.3`), Vite 5, Vue Router 4 (012-design-system-rebrand)
+- N/A (no data storage involved) (012-design-system-rebrand)
+
+- Python 3.11 (backend), TypeScript/Vue.js 3 (frontend) (001-public-roadmap)
+
+## Project Structure
+
+```text
+src/
+tests/
+```
+
+## Commands
+
+cd src [ONLY COMMANDS FOR ACTIVE TECHNOLOGIES][ONLY COMMANDS FOR ACTIVE TECHNOLOGIES] pytest [ONLY COMMANDS FOR ACTIVE TECHNOLOGIES][ONLY COMMANDS FOR ACTIVE TECHNOLOGIES] ruff check .
+
+## Code Style
+
+Python 3.11 (backend), TypeScript/Vue.js 3 (frontend): Follow standard conventions
+
+## Recent Changes
+- 012-design-system-rebrand: Added TypeScript 5.3 / Vue 3.4 + `@weni/unnnic-system` (upgrade: `3.12.6-alpha` → `3.25.3`), Vite 5, Vue Router 4
+- 011-readme-jira-docs: Added Markdown documentation + N/A (documentation only)
+- 010-canvas-conversational-search: Added TypeScript 5.3+ with Vue 3.4+ + Vue 3.4, Vue Router 4.2, @weni/unnnic-system, Vite 5
+
+
+<!-- MANUAL ADDITIONS START -->
+<!-- MANUAL ADDITIONS END -->
