@@ -41,6 +41,10 @@ def health_check():
     else:
         status = "degraded"
 
+    from ..config import Config
+
+    project_keys = Config.get_project_keys()
+
     response = {
         "status": status,
         "lastSyncAt": (
@@ -49,6 +53,7 @@ def health_check():
         "lastSyncStatus": metadata.last_sync_status,
         "itemCount": metadata.item_count,
         "isStale": is_stale,
+        "configuredProjects": project_keys,
     }
 
     if metadata.error_message:
