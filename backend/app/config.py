@@ -189,7 +189,7 @@ class Config:
         return {
             "public_roadmap": project_mapping.public_roadmap,
             "roadmap_status": project_mapping.roadmap_status,
-            "module": project_mapping.module,
+            "media_type": project_mapping.media_type,
             "release_year": project_mapping.release_year,
             "release_quarter": project_mapping.release_quarter,
             "release_month": project_mapping.release_month,

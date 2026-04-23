@@ -23,7 +23,7 @@
           "required": [
             "public_roadmap",
             "roadmap_status",
-            "module",
+            "media_type",
             "release_year",
             "release_quarter",
             "release_month",
@@ -49,10 +49,10 @@
               "description": "Delivery status (DELIVERED, NOW, NEXT, FUTURE)",
               "examples": ["customfield_10002"]
             },
-            "module": {
+            "media_type": {
               "type": "string",
               "pattern": "^customfield_\\d{5,}$",
-              "description": "Product module/area",
+              "description": "Media type/area",
               "examples": ["customfield_10003"]
             },
             "release_year": {
@@ -136,7 +136,7 @@
         "NEXUS": {
           "public_roadmap": "customfield_10001",
           "roadmap_status": "customfield_10002",
-          "module": "customfield_10003",
+          "media_type": "customfield_10003",
           "release_year": "customfield_10004",
           "release_quarter": "customfield_10005",
           "release_month": "customfield_10006",
