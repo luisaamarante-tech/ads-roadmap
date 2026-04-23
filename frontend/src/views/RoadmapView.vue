@@ -353,7 +353,7 @@ onMounted(async () => {
       <!-- Top bar with Request Feature button -->
       <nav class="roadmap-page__navbar">
         <div class="roadmap-page__navbar-content">
-          <div class="roadmap-page__navbar-spacer"></div>
+          <span class="roadmap-page__internal-label">🔒 Internal use only</span>
           <unnnic-button
             type="primary"
             text="Request Feature"
@@ -460,8 +460,10 @@ onMounted(async () => {
   gap: var(--unnnic-spacing-inline-sm, 12px);
 }
 
-.roadmap-page__navbar-spacer {
+.roadmap-page__internal-label {
   flex: 1;
+  font-size: 13px;
+  color: #9ca3af;
 }
 
 /* BEM: Element - header */
