@@ -20,24 +20,21 @@
           <div v-if="isLoadingModules" class="form-field__loading">
             Loading modules...
           </div>
+          <p v-else-if="modules.length === 0" class="form-field__empty-modules">
+            Modules will appear as items are added to the roadmap.
+          </p>
           <select
             v-else
             id="module-select"
             v-model="form.moduleId"
             class="form-field__select"
             required
-            :disabled="modules.length === 0 || isSubmitting"
+            :disabled="isSubmitting"
             :aria-required="true"
             :aria-invalid="!!errors.moduleId"
             :aria-describedby="errors.moduleId ? 'module-error' : undefined"
           >
-            <option value="" disabled>
-              {{
-                modules.length === 0
-                  ? 'No modules available'
-                  : 'Select a module'
-              }}
-            </option>
+            <option value="" disabled>Select a module</option>
             <option
               v-for="module in modules"
               :key="module.id"
@@ -435,6 +432,17 @@ function resetForm() {
   color: #67738b;
   font-size: 0.875rem;
   font-style: italic;
+}
+
+.form-field__empty-modules {
+  padding: 0.75rem;
+  color: #67738b;
+  font-size: 0.875rem;
+  font-style: italic;
+  margin: 0;
+  border: 1px dashed #e8e8e8;
+  border-radius: 8px;
+  background: #f8f8f8;
 }
 
 .form-field__error {
