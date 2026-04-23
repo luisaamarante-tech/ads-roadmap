@@ -241,7 +241,7 @@ onUnmounted(() => {
       </div>
 
       <!-- Quarter buttons -->
-      <div class="filters__group">
+      <div class="filters__group filters__group--quarter">
         <span class="filters__label">Quarter</span>
         <div
           class="filters__quarter-buttons"
@@ -483,9 +483,9 @@ onUnmounted(() => {
 /* BEM: Element - container */
 .filters__container {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: flex-end;
-  gap: var(--unnnic-spacing-inline-md, 20px);
+  gap: 12px;
   padding: var(--unnnic-spacing-stack-md, 20px);
   background: var(--unnnic-color-background-snow, #fff);
   border: 1px solid var(--unnnic-color-neutral-soft, #e8e8e8);
@@ -497,6 +497,8 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: var(--unnnic-spacing-stack-xs, 8px);
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 /* BEM: Element - label */
@@ -515,7 +517,8 @@ onUnmounted(() => {
   background: var(--unnnic-color-background-snow, #fff);
   color: var(--unnnic-color-neutral-black, #1a1a1a);
   cursor: pointer;
-  min-width: 150px;
+  width: 100%;
+  min-width: 0;
   transition: all 0.2s;
 }
 
@@ -577,9 +580,14 @@ onUnmounted(() => {
   color: var(--unnnic-color-background-snow, #fff);
 }
 
+/* BEM: Modifier - quarter */
+.filters__group--quarter {
+  flex: 0 0 auto;
+}
+
 /* BEM: Modifier - modules */
 .filters__group--modules {
-  min-width: 200px;
+  min-width: 0;
   position: relative;
 }
 
@@ -594,7 +602,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  min-width: 180px;
+  min-width: 0;
   padding: 10px 14px;
   font-size: var(--unnnic-font-size-body-md, 14px);
   border: 1px solid var(--unnnic-color-neutral-soft, #e8e8e8);
@@ -730,20 +738,26 @@ onUnmounted(() => {
   border-radius: var(--unnnic-border-radius-sm, 8px);
 }
 
-/* Responsive */
-@media (width <= 768px) {
+/* Truncate label text in dropdowns when space is tight */
+.filters__module-toggle > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Responsive — tablet: wrap into 2 columns */
+@media (width <= 1024px) {
   .filters__container {
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--unnnic-spacing-stack-sm, 16px);
+    flex-wrap: wrap;
+    gap: 16px;
   }
 
   .filters__group {
-    width: 100%;
+    flex: 1 1 calc(50% - 8px);
   }
 
-  .filters__select {
-    width: 100%;
+  .filters__group--quarter {
+    flex: 1 1 100%;
   }
 
   .filters__quarter-buttons {
@@ -757,6 +771,21 @@ onUnmounted(() => {
   .filters__clear-btn {
     margin-top: 0;
     justify-content: center;
+  }
+}
+
+/* Responsive — mobile: single column */
+@media (width <= 600px) {
+  .filters__container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filters__group,
+  .filters__group--quarter,
+  .filters__group--modules {
+    flex: 1 1 100%;
+    width: 100%;
   }
 }
 </style>
