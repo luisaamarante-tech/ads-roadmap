@@ -11,11 +11,13 @@ import type {
   RoadmapStats,
   RoadmapFilters,
   Module,
+  Goal,
 } from '@/types/roadmap';
 import {
   getRoadmapItems,
   getStats,
   getModules,
+  getGoals,
 } from '@/services/roadmapService';
 import RoadmapTabs from '@/components/RoadmapTabs.vue';
 import RoadmapCardList from '@/components/RoadmapCardList.vue';
@@ -31,6 +33,7 @@ const activeStatus = ref<DeliveryStatus>('DELIVERED');
 const items = ref<RoadmapItem[]>([]);
 const stats = ref<RoadmapStats | null>(null);
 const modules = ref<Module[]>([]);
+const goals = ref<Goal[]>([]);
 const loading = ref(true);
 const error = ref<string | null>(null);
 
@@ -128,6 +131,15 @@ async function handleFetchModules(): Promise<void> {
     modules.value = response.modules;
   } catch (e) {
     console.error('Failed to fetch modules:', e);
+  }
+}
+
+async function handleFetchGoals(): Promise<void> {
+  try {
+    const response = await getGoals();
+    goals.value = response.goals;
+  } catch (e) {
+    console.error('Failed to fetch goals:', e);
   }
 }
 
@@ -307,6 +319,7 @@ onMounted(async () => {
     await handleSharedEpicLink();
     // Don't load modules/stats yet, wait for user interaction
     await handleFetchModules();
+    await handleFetchGoals();
     return;
   }
 
@@ -315,6 +328,7 @@ onMounted(async () => {
   handleFetchItems();
   handleFetchStats();
   handleFetchModules();
+  handleFetchGoals();
 });
 </script>
 
@@ -350,7 +364,7 @@ onMounted(async () => {
       <!-- Main content -->
       <main class="roadmap-page__content">
         <!-- Filters -->
-        <RoadmapFiltersComponent v-model="filters" :modules="modules" />
+        <RoadmapFiltersComponent v-model="filters" :modules="modules" :goals="goals" />
 
         <!-- Status tabs -->
         <RoadmapTabs v-model="activeStatus" :stats="stats" />

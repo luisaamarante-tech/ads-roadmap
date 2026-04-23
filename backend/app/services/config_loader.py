@@ -44,6 +44,7 @@ class ProjectFieldMapping:
     roadmap_image_url_3: str
     roadmap_image_url_4: str
     roadmap_likes: str
+    semester_goal: str = ""  # Optional: multi-value goal field
 
 
 @dataclass

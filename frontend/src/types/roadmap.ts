@@ -20,9 +20,17 @@ export interface RoadmapItem {
   documentationUrl?: string | null;
   likes: number;
   lastSyncedAt: string;
+  semesterGoals: string[];
+  semesterGoalIds: string[];
 }
 
 export interface Module {
+  id: string;
+  name: string;
+  itemCount: number;
+}
+
+export interface Goal {
   id: string;
   name: string;
   itemCount: number;
@@ -33,6 +41,7 @@ export interface RoadmapFilters {
   year?: number;
   quarter?: Quarter;
   module?: string | string[];
+  goal?: string | string[];
 }
 
 export interface LikeResponse {
@@ -51,6 +60,10 @@ export interface RoadmapItemsResponse {
 
 export interface ModulesResponse {
   modules: Module[];
+}
+
+export interface GoalsResponse {
+  goals: Goal[];
 }
 
 export interface RoadmapStats {

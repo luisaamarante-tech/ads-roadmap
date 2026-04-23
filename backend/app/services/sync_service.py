@@ -16,7 +16,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 # Local
 from ..config import Config
-from ..models import Module, RoadmapItem, SyncMetadata
+from ..models import Goal, Module, RoadmapItem, SyncMetadata
 from .cache_service import CacheService
 from .jira_client import JiraClient
 
@@ -62,12 +62,14 @@ class SyncService:
 
             logger.info(f"Transformed {len(items)} valid roadmap items")
 
-            # Extract modules from items
+            # Extract modules and goals from items
             modules = self._extract_modules(items)
+            goals = self._extract_goals(items)
 
             # Update cache
             self.cache.set_items(items)
             self.cache.set_modules(modules)
+            self.cache.set_goals(goals)
 
             # Create success metadata
             metadata = SyncMetadata(
@@ -83,7 +85,8 @@ class SyncService:
 
             duration = (datetime.utcnow() - start_time).total_seconds()
             logger.info(
-                f"Sync completed successfully in {duration:.2f}s: {len(items)} items, {len(modules)} modules"
+                f"Sync completed in {duration:.2f}s: {len(items)} items, "
+                f"{len(modules)} modules, {len(goals)} goals"
             )
 
             return metadata
@@ -101,6 +104,20 @@ class SyncService:
             self.cache.set_metadata(metadata)
 
             return metadata
+
+    def _extract_goals(self, items: list[RoadmapItem]) -> list[Goal]:
+        """Extract unique semester goals from items with counts."""
+        goal_counts: dict[str, dict] = defaultdict(lambda: {"name": "", "count": 0})
+
+        for item in items:
+            for goal_id, goal_name in zip(item.semester_goal_ids, item.semester_goals):
+                goal_counts[goal_id]["name"] = goal_name
+                goal_counts[goal_id]["count"] += 1
+
+        return [
+            Goal(id=goal_id, name=data["name"], item_count=data["count"])
+            for goal_id, data in sorted(goal_counts.items())
+        ]
 
     def _extract_modules(self, items: list[RoadmapItem]) -> list[Module]:
         """

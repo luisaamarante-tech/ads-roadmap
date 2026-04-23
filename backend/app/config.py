@@ -201,4 +201,5 @@ class Config:
             "roadmap_image_url_3": project_mapping.roadmap_image_url_3,
             "roadmap_image_url_4": project_mapping.roadmap_image_url_4,
             "roadmap_likes": project_mapping.roadmap_likes,
+            "semester_goal": project_mapping.semester_goal,
         }

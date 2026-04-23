@@ -251,6 +251,13 @@ class JiraClient:
                         )
                         likes = 0
 
+            # Extract semester goals (multi-value array field)
+            semester_goals = []
+            if field_mapping.get("semester_goal"):
+                semester_goals = self._extract_list_field(
+                    fields.get(field_mapping["semester_goal"])
+                )
+
             # Extract images from custom field URLs (new approach)
             # Try custom image URL fields first, fall back to attachments
             images = []
@@ -282,8 +289,8 @@ class JiraClient:
 
             return RoadmapItem(
                 id=issue_key,
-                title=title[:200],  # Limit title length
-                description=description[:5000],  # Limit description length
+                title=title[:200],
+                description=description[:5000],
                 status=status,
                 module=module,
                 module_id="",  # Will be generated in __post_init__
@@ -294,6 +301,7 @@ class JiraClient:
                 documentation_url=documentation_url,
                 likes=likes,
                 last_synced_at=datetime.utcnow(),
+                semester_goals=semester_goals,
             )
         except Exception as e:
             logger.error(f"Failed to extract roadmap item from issue: {e}")
@@ -512,6 +520,16 @@ class JiraClient:
             return int(field_value)
         except (ValueError, TypeError):
             return None
+
+    def _extract_list_field(self, field_value) -> list[str]:
+        """Extract a list of string values from a multi-value JIRA field."""
+        if not field_value:
+            return []
+        if isinstance(field_value, list):
+            return [str(v) for v in field_value if v]
+        if isinstance(field_value, str):
+            return [field_value]
+        return []
 
     def _extract_url_field(self, field_value) -> Optional[str]:
         """Extract URL from a custom field."""

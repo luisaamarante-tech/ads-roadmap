@@ -4,11 +4,12 @@
  */
 
 import { computed, ref, onMounted, onUnmounted } from 'vue';
-import type { Module, Quarter, RoadmapFilters } from '@/types/roadmap';
+import type { Goal, Module, Quarter, RoadmapFilters } from '@/types/roadmap';
 
 interface Props {
   modelValue: RoadmapFilters;
   modules: Module[];
+  goals: Goal[];
   availableYears?: number[];
 }
 
@@ -33,6 +34,8 @@ const quarters: { value: Quarter | ''; label: string }[] = [
 
 const isModuleDropdownOpen = ref(false);
 const moduleDropdownRef = ref<HTMLElement | null>(null);
+const isGoalDropdownOpen = ref(false);
+const goalDropdownRef = ref<HTMLElement | null>(null);
 
 const selectedYear = computed({
   get: () => props.modelValue.year ?? 0,
@@ -79,11 +82,37 @@ const moduleButtonLabel = computed(() => {
   return `${count} Modules`;
 });
 
+const selectedGoals = computed({
+  get: (): string[] => {
+    const goal = props.modelValue.goal;
+    if (!goal) return [];
+    if (Array.isArray(goal)) return goal;
+    return [goal];
+  },
+  set: (value: string[]) => {
+    emit('update:modelValue', {
+      ...props.modelValue,
+      goal: value.length > 0 ? value : undefined,
+    });
+  },
+});
+
+const goalButtonLabel = computed(() => {
+  const count = selectedGoals.value.length;
+  if (count === 0) return 'All Goals';
+  if (count === 1) {
+    const goal = props.goals.find((g) => g.id === selectedGoals.value[0]);
+    return goal?.name || 'All Goals';
+  }
+  return `${count} Goals`;
+});
+
 const hasActiveFilters = computed(() => {
   return !!(
     props.modelValue.year ||
     props.modelValue.quarter ||
-    props.modelValue.module
+    props.modelValue.module ||
+    props.modelValue.goal
   );
 });
 
@@ -107,12 +136,31 @@ function toggleModuleDropdown(): void {
   isModuleDropdownOpen.value = !isModuleDropdownOpen.value;
 }
 
+function onGoalToggle(goalId: string): void {
+  const current = selectedGoals.value;
+  if (current.includes(goalId)) {
+    selectedGoals.value = current.filter((id) => id !== goalId);
+  } else {
+    selectedGoals.value = [...current, goalId];
+  }
+}
+
+function toggleGoalDropdown(): void {
+  isGoalDropdownOpen.value = !isGoalDropdownOpen.value;
+}
+
 function handleClickOutside(event: MouseEvent): void {
   if (
     moduleDropdownRef.value &&
     !moduleDropdownRef.value.contains(event.target as Node)
   ) {
     isModuleDropdownOpen.value = false;
+  }
+  if (
+    goalDropdownRef.value &&
+    !goalDropdownRef.value.contains(event.target as Node)
+  ) {
+    isGoalDropdownOpen.value = false;
   }
 }
 
@@ -223,6 +271,68 @@ onUnmounted(() => {
               />
               <span class="filters__module-label">
                 {{ mod.name }} ({{ mod.itemCount }})
+              </span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Goal multi-select dropdown -->
+      <div
+        ref="goalDropdownRef"
+        class="filters__group filters__group--modules"
+      >
+        <label class="filters__label">Goal</label>
+        <div class="filters__module-dropdown">
+          <button
+            type="button"
+            class="filters__module-toggle"
+            :aria-expanded="isGoalDropdownOpen"
+            aria-haspopup="true"
+            @click="toggleGoalDropdown"
+          >
+            <span>{{ goalButtonLabel }}</span>
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 12 12"
+              fill="none"
+              :class="[
+                'filters__module-toggle-icon',
+                { 'filters__module-toggle-icon--open': isGoalDropdownOpen },
+              ]"
+              aria-hidden="true"
+            >
+              <path
+                d="M3 4.5L6 7.5L9 4.5"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+          <div
+            v-if="isGoalDropdownOpen"
+            class="filters__module-list"
+            role="menu"
+          >
+            <label
+              v-for="goal in goals"
+              :key="goal.id"
+              class="filters__module-item"
+              role="menuitemcheckbox"
+              :aria-checked="selectedGoals.includes(goal.id)"
+            >
+              <input
+                type="checkbox"
+                :value="goal.id"
+                :checked="selectedGoals.includes(goal.id)"
+                class="filters__module-checkbox"
+                @change="onGoalToggle(goal.id)"
+              />
+              <span class="filters__module-label">
+                {{ goal.name }} ({{ goal.itemCount }})
               </span>
             </label>
           </div>

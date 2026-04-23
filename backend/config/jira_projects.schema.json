@@ -120,6 +120,12 @@
               "pattern": "^customfield_\\d{5,}$",
               "description": "Custom field ID for storing the number of likes an epic has received",
               "examples": ["customfield_10107"]
+            },
+            "semester_goal": {
+              "type": "string",
+              "pattern": "^customfield_\\d{5,}$",
+              "description": "Custom field ID for the roadmap semester goal (multi-value)",
+              "examples": ["customfield_10108"]
             }
           },
           "additionalProperties": false

@@ -14,13 +14,14 @@ from pathlib import Path
 from typing import Optional
 
 # Local
-from ..models import DeliveryStatus, Module, Quarter, RoadmapItem, SyncMetadata
+from ..models import DeliveryStatus, Goal, Module, Quarter, RoadmapItem, SyncMetadata
 
 logger = logging.getLogger(__name__)
 
 # Cache keys
 CACHE_KEY_ITEMS = "roadmap:items"
 CACHE_KEY_MODULES = "roadmap:modules"
+CACHE_KEY_GOALS = "roadmap:goals"
 CACHE_KEY_METADATA = "roadmap:metadata"
 
 # Fallback file path
@@ -71,21 +72,14 @@ class CacheService:
         year: Optional[int] = None,
         quarter: Optional[str] = None,
         module: Optional[str | list[str]] = None,
+        goal: Optional[str | list[str]] = None,
     ) -> list[RoadmapItem]:
-        """
-        Get items matching the given filters.
-
-        Args:
-            status: Filter by delivery status
-            year: Filter by release year
-            quarter: Filter by release quarter
-            module: Filter by module (can be a single string or list of module IDs)
-        """
+        """Get items matching the given filters."""
         items = self.get_items()
         return [
             item
             for item in items
-            if item.matches_filters(status, year, quarter, module)
+            if item.matches_filters(status, year, quarter, module, goal)
         ]
 
     def get_item_by_id(self, item_id: str) -> Optional[RoadmapItem]:
@@ -95,6 +89,20 @@ class CacheService:
             if item.id == item_id:
                 return item
         return None
+
+    # ==================== Goal Operations ====================
+
+    def get_goals(self) -> list[Goal]:
+        """Get all cached semester goals."""
+        goals_data = self.cache.get(CACHE_KEY_GOALS)
+        if goals_data is None:
+            goals_data = self._load_from_fallback().get("goals", [])
+        return [self._dict_to_goal(g) for g in goals_data]
+
+    def set_goals(self, goals: list[Goal]):
+        """Cache all semester goals."""
+        goals_data = [g.to_dict() for g in goals]
+        self.cache.set(CACHE_KEY_GOALS, goals_data)
 
     # ==================== Module Operations ====================
 
@@ -133,6 +141,7 @@ class CacheService:
         """Clear all cached data to force a refresh on next request."""
         self.cache.delete(CACHE_KEY_ITEMS)
         self.cache.delete(CACHE_KEY_MODULES)
+        self.cache.delete(CACHE_KEY_GOALS)
         self.cache.delete(CACHE_KEY_METADATA)
         logger.info("Cache invalidated")
 
@@ -182,22 +191,15 @@ class CacheService:
         year: Optional[int] = None,
         quarter: Optional[str] = None,
         module: Optional[str | list[str]] = None,
+        goal: Optional[str | list[str]] = None,
     ) -> dict:
-        """
-        Get item counts by status.
-
-        Optionally filtered by year, quarter, and module (single or multiple).
-
-        Args:
-            year: Filter by release year
-            quarter: Filter by release quarter
-            module: Filter by module (can be a single string or list of module IDs)
-        """
+        """Get item counts by status, optionally filtered."""
         items = self.get_filtered_items(
-            status=None,  # Don't filter by status, we want counts per status
+            status=None,
             year=year,
             quarter=quarter,
             module=module,
+            goal=goal,
         )
 
         stats = {
@@ -223,6 +225,7 @@ class CacheService:
             data = {
                 "items": self.cache.get(CACHE_KEY_ITEMS) or [],
                 "modules": self.cache.get(CACHE_KEY_MODULES) or [],
+                "goals": self.cache.get(CACHE_KEY_GOALS) or [],
                 "metadata": self.cache.get(CACHE_KEY_METADATA) or {},
                 "saved_at": datetime.utcnow().isoformat() + "Z",
             }
@@ -267,6 +270,16 @@ class CacheService:
             last_synced_at=datetime.fromisoformat(
                 data.get("lastSyncedAt", datetime.utcnow().isoformat()).replace("Z", "")
             ),
+            semester_goals=data.get("semesterGoals", []),
+            semester_goal_ids=data.get("semesterGoalIds", []),
+        )
+
+    def _dict_to_goal(self, data: dict) -> Goal:
+        """Convert dictionary to Goal."""
+        return Goal(
+            id=data.get("id", ""),
+            name=data.get("name", ""),
+            item_count=data.get("itemCount", 0),
         )
 
     def _dict_to_module(self, data: dict) -> Module:

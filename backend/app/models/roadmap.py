@@ -51,6 +51,8 @@ class RoadmapItem:
     documentation_url: Optional[str] = None
     likes: int = 0
     last_synced_at: datetime = field(default_factory=datetime.utcnow)
+    semester_goals: List[str] = field(default_factory=list)
+    semester_goal_ids: List[str] = field(default_factory=list)
 
     def __post_init__(self):
         """Validate and normalize fields after initialization."""
@@ -68,6 +70,10 @@ class RoadmapItem:
         # Ensure module_id is a valid slug
         if not self.module_id:
             self.module_id = self._slugify(self.module)
+
+        # Generate semester_goal_ids from semester_goals if not set
+        if not self.semester_goal_ids and self.semester_goals:
+            self.semester_goal_ids = [self._slugify(g) for g in self.semester_goals]
 
     @staticmethod
     def _slugify(text: str) -> str:
@@ -93,6 +99,8 @@ class RoadmapItem:
             "documentationUrl": self.documentation_url,
             "likes": self.likes,
             "lastSyncedAt": self.last_synced_at.isoformat() + "Z",
+            "semesterGoals": self.semester_goals,
+            "semesterGoalIds": self.semester_goal_ids,
         }
 
     def matches_filters(
@@ -101,6 +109,7 @@ class RoadmapItem:
         year: Optional[int] = None,
         quarter: Optional[str] = None,
         module: Optional[str | List[str]] = None,
+        goal: Optional[str | List[str]] = None,
     ) -> bool:
         """
         Check if item matches the given filters.
@@ -118,12 +127,18 @@ class RoadmapItem:
         if quarter and self.release_quarter.value != quarter:
             return False
         if module:
-            # Handle both single module and list of modules
             if isinstance(module, list):
                 if self.module_id not in module:
                     return False
             else:
                 if self.module_id != module:
+                    return False
+        if goal:
+            if isinstance(goal, list):
+                if not any(gid in self.semester_goal_ids for gid in goal):
+                    return False
+            else:
+                if goal not in self.semester_goal_ids:
                     return False
         return True
 
@@ -145,6 +160,18 @@ class Module:
             "name": self.name,
             "itemCount": self.item_count,
         }
+
+
+@dataclass
+class Goal:
+    """Represents a semester goal for filtering."""
+
+    id: str  # URL-safe slug
+    name: str  # Display name
+    item_count: int = 0
+
+    def to_dict(self) -> dict:
+        return {"id": self.id, "name": self.name, "itemCount": self.item_count}
 
 
 @dataclass

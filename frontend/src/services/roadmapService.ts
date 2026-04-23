@@ -8,6 +8,7 @@ import type {
   RoadmapItemsResponse,
   RoadmapItem,
   ModulesResponse,
+  GoalsResponse,
   RoadmapStatsResponse,
   HealthResponse,
   LikeResponse,
@@ -42,13 +43,18 @@ export async function getRoadmapItems(
   // Handle module: can be string or array
   if (filters.module) {
     if (Array.isArray(filters.module)) {
-      // Append each module as a separate param: ?module=X&module=Y
-      filters.module.forEach((moduleId) => {
-        params.append('module', moduleId);
-      });
+      filters.module.forEach((moduleId) => params.append('module', moduleId));
     } else {
-      // Single module (backward compatibility)
       params.append('module', filters.module);
+    }
+  }
+
+  // Handle goal: can be string or array
+  if (filters.goal) {
+    if (Array.isArray(filters.goal)) {
+      filters.goal.forEach((goalId) => params.append('goal', goalId));
+    } else {
+      params.append('goal', filters.goal);
     }
   }
 
@@ -81,6 +87,14 @@ export async function likeEpic(itemId: string): Promise<LikeResponse> {
  */
 export async function getModules(): Promise<ModulesResponse> {
   const response = await api.get<ModulesResponse>('/roadmap/modules');
+  return response.data;
+}
+
+/**
+ * Get all available semester goals for filtering.
+ */
+export async function getGoals(): Promise<GoalsResponse> {
+  const response = await api.get<GoalsResponse>('/roadmap/goals');
   return response.data;
 }
 

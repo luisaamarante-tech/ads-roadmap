@@ -74,28 +74,27 @@ def get_items():
     quarter = request.args.get("quarter")
 
     # Handle module parameter: can be single value or list
-    # getlist() returns all values for a repeated parameter
     module_list = request.args.getlist("module")
-
-    # Backward compatibility: support single module
     if len(module_list) == 1:
         module = module_list[0]
     elif len(module_list) > 1:
-        # Validate: maximum 10 modules per request
         if len(module_list) > 10:
             return (
-                jsonify(
-                    {
-                        "error": "INVALID_REQUEST",
-                        "message": "Maximum 10 modules allowed per request",
-                    }
-                ),
+                jsonify({"error": "INVALID_REQUEST", "message": "Maximum 10 modules allowed per request"}),
                 400,
             )
         module = module_list
     else:
-        # No module filter
         module = None
+
+    # Handle goal parameter: can be single value or list
+    goal_list = request.args.getlist("goal")
+    if len(goal_list) == 1:
+        goal = goal_list[0]
+    elif len(goal_list) > 1:
+        goal = goal_list
+    else:
+        goal = None
 
     # Get filtered items
     cache_service = CacheService(cache)
@@ -104,6 +103,7 @@ def get_items():
         year=year,
         quarter=quarter,
         module=module,
+        goal=goal,
     )
 
     # Get metadata
@@ -237,6 +237,14 @@ def like_item(item_id: str):
         )
 
 
+@roadmap_bp.route("/goals", methods=["GET"])
+def get_goals():
+    """Get all available semester goals for filtering."""
+    cache_service = CacheService(cache)
+    goals = cache_service.get_goals()
+    return jsonify({"goals": [goal.to_dict() for goal in goals]})
+
+
 @roadmap_bp.route("/modules", methods=["GET"])
 def get_modules():
     """
@@ -277,10 +285,8 @@ def get_stats():
     year = request.args.get("year", type=int)
     quarter = request.args.get("quarter")
 
-    # Handle module parameter: can be single value or list (same as /items)
+    # Handle module parameter
     module_list = request.args.getlist("module")
-
-    # Convert to appropriate format
     if len(module_list) == 1:
         module = module_list[0]
     elif len(module_list) > 1:
@@ -288,12 +294,22 @@ def get_stats():
     else:
         module = None
 
+    # Handle goal parameter
+    goal_list = request.args.getlist("goal")
+    if len(goal_list) == 1:
+        goal = goal_list[0]
+    elif len(goal_list) > 1:
+        goal = goal_list
+    else:
+        goal = None
+
     # Get stats
     cache_service = CacheService(cache)
     stats = cache_service.get_stats(
         year=year,
         quarter=quarter,
         module=module,
+        goal=goal,
     )
 
     # Add metadata
