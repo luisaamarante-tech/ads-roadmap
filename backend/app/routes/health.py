@@ -42,8 +42,17 @@ def health_check():
         status = "degraded"
 
     from ..config import Config
+    from ..services.sync_service import SyncService
 
     project_keys = Config.get_project_keys()
+
+    # Auto-sync on cold start: if cache is empty but JIRA is configured, sync now
+    if metadata.item_count == 0 and Config.is_jira_configured() and project_keys:
+        try:
+            sync_service = SyncService(cache_service)
+            metadata = sync_service.sync()
+        except Exception:
+            pass
 
     response = {
         "status": status,
