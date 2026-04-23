@@ -356,7 +356,7 @@ onMounted(async () => {
           <span class="roadmap-page__internal-label">🔒 Internal use only</span>
           <unnnic-button
             type="primary"
-            text="Request Feature"
+            text="New Request"
             @click="onRequestFeatureClick"
           />
         </div>

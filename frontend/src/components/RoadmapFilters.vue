@@ -477,7 +477,7 @@ onUnmounted(() => {
 <style scoped>
 /* BEM: Block - filters */
 .filters {
-  margin-bottom: var(--unnnic-spacing-stack-lg, 24px);
+  margin-bottom: 12px;
 }
 
 /* BEM: Element - container */

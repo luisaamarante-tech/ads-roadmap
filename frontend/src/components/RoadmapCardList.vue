@@ -23,8 +23,8 @@ const props = withDefaults(defineProps<Props>(), {
 const statusLabels: Record<DeliveryStatus, string> = {
   DELIVERED: 'Delivered',
   NOW: 'In Progress',
-  NEXT: 'Coming Next',
-  FUTURE: 'Planned',
+  NEXT: 'Next',
+  FUTURE: 'Future',
 };
 
 // Animation state - tracks if cards should animate in
@@ -59,10 +59,10 @@ watch(
     <!-- Header with count -->
     <header class="card-list__header">
       <div class="card-list__status-info">
-        <span class="card-list__status-label">{{ statusLabels[status] }}:</span>
         <strong class="card-list__count">{{ items.length }}</strong>
+        <span class="card-list__status-label">{{ statusLabels[status] }}</span>
         <span class="card-list__count-text">
-          {{ items.length === 1 ? 'item' : 'items' }}
+          {{ items.length === 1 ? 'Item' : 'Items' }}
         </span>
       </div>
     </header>

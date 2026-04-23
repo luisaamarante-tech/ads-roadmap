@@ -52,6 +52,38 @@
           >
         </div>
 
+        <!-- Product Pillar -->
+        <div class="form-field">
+          <label for="pillar-select" class="form-field__label">
+            Product Pillar <span aria-hidden="true">*</span>
+          </label>
+          <select
+            id="pillar-select"
+            v-model="form.pillar"
+            class="form-field__select"
+            required
+            :disabled="isSubmitting"
+            :aria-required="true"
+            :aria-invalid="!!errors.pillar"
+            :aria-describedby="errors.pillar ? 'pillar-error' : undefined"
+          >
+            <option value="" disabled>Select a pillar</option>
+            <option value="Campaign Creation">Campaign Creation</option>
+            <option value="Management & Optimization">Management &amp; Optimization</option>
+            <option value="Billing & Invoicing">Billing &amp; Invoicing</option>
+            <option value="Reporting & Analytics">Reporting &amp; Analytics</option>
+            <option value="Daily Operations">Daily Operations</option>
+            <option value="Other">Other</option>
+          </select>
+          <span
+            v-if="errors.pillar"
+            id="pillar-error"
+            class="form-field__error"
+            role="alert"
+            >{{ errors.pillar }}</span
+          >
+        </div>
+
         <!-- Title -->
         <div class="form-field">
           <unnnic-input
@@ -208,6 +240,7 @@ const form = ref<FeatureRequestPayload>({
   title: '',
   description: '',
   contactEmail: '',
+  pillar: '',
   website: '',
 });
 
@@ -227,6 +260,7 @@ const showModal = computed(() => props.show);
 const isFormValid = computed(() => {
   return (
     form.value.moduleId &&
+    form.value.pillar &&
     form.value.title.length >= 3 &&
     form.value.description.length >= 10 &&
     form.value.contactEmail.includes('@')
@@ -270,6 +304,10 @@ function validateForm(): boolean {
 
   if (!form.value.moduleId) {
     errors.value.moduleId = 'Media type is required';
+  }
+
+  if (!form.value.pillar) {
+    errors.value.pillar = 'Product pillar is required';
   }
 
   if (!form.value.title) {
@@ -371,6 +409,7 @@ function resetForm() {
     title: '',
     description: '',
     contactEmail: '',
+    pillar: '',
     website: '',
   };
   errors.value = {};

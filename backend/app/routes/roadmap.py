@@ -487,6 +487,7 @@ def create_feature_request():
             title=data.get("title", ""),
             description=data.get("description", ""),
             contact_email=data.get("contactEmail", ""),
+            pillar=data.get("pillar", ""),
             website=data.get("website", ""),
         )
 
@@ -557,35 +558,35 @@ def create_feature_request():
             created_at=datetime.utcnow(),
         )
 
-        # Send Slack notification (non-blocking - don't fail the request if Slack fails)
-        notification_status = "PENDING"
-        if Config.is_slack_configured():
-            try:
-                # Get module display name
-                cache_service_modules = CacheService(cache)
-                all_modules = cache_service_modules.get_modules()
-                module_name = payload.module_id
-                for mod in all_modules:
-                    if mod.id == payload.module_id:
-                        module_name = mod.name
-                        break
-
-                # Send notification
-                slack_service = SlackService()
-                success, status = slack_service.send_feature_request_notification(
-                    module_name=module_name,
-                    title=payload.title,
-                    description_excerpt=payload.description[:200],
-                    contact_email=payload.contact_email,
-                    jira_issue_key=issue_reference.key,
-                    jira_issue_url=issue_reference.url,
-                )
-                notification_status = status
-            except Exception as slack_error:
-                logger.error(f"Failed to send Slack notification: {slack_error}")
-                notification_status = "FAILED"
-        else:
-            logger.info("Slack not configured, skipping notification")
+        # Slack notifications disabled — uncomment to re-enable
+        notification_status = "DISABLED"
+        # if Config.is_slack_configured():
+        #     try:
+        #         # Get module display name
+        #         cache_service_modules = CacheService(cache)
+        #         all_modules = cache_service_modules.get_modules()
+        #         module_name = payload.module_id
+        #         for mod in all_modules:
+        #             if mod.id == payload.module_id:
+        #                 module_name = mod.name
+        #                 break
+        #
+        #         # Send notification
+        #         slack_service = SlackService()
+        #         success, status = slack_service.send_feature_request_notification(
+        #             module_name=module_name,
+        #             title=payload.title,
+        #             description_excerpt=payload.description[:200],
+        #             contact_email=payload.contact_email,
+        #             jira_issue_key=issue_reference.key,
+        #             jira_issue_url=issue_reference.url,
+        #         )
+        #         notification_status = status
+        #     except Exception as slack_error:
+        #         logger.error(f"Failed to send Slack notification: {slack_error}")
+        #         notification_status = "FAILED"
+        # else:
+        #     logger.info("Slack not configured, skipping notification")
 
         response = FeatureRequestResponse(
             success=True,
@@ -634,6 +635,8 @@ def _validate_feature_request_payload(payload: FeatureRequestPayload) -> list[st
     # Required fields
     if not payload.module_id:
         errors.append("Media type is required")
+    if not payload.pillar:
+        errors.append("Product pillar is required")
     if not payload.title:
         errors.append("Title is required")
     if not payload.description:
@@ -701,12 +704,14 @@ def _build_jira_description(payload: FeatureRequestPayload) -> str:
     """
     # Sanitize all text inputs
     module_id = _sanitize_text(payload.module_id)
+    pillar = _sanitize_text(payload.pillar)
     description = _sanitize_text(payload.description)
     contact_email = _sanitize_text(payload.contact_email)
 
     return f"""Feature Request Details:
 
 Module: {module_id}
+Product Pillar: {pillar}
 
 Description:
 {description}

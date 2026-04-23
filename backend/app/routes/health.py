@@ -51,7 +51,7 @@ def health_check():
     is_due_for_sync = (
         metadata.item_count == 0
         or metadata.last_sync_at is None
-        or (datetime.utcnow() - metadata.last_sync_at).total_seconds() > 1800
+        or (datetime.utcnow() - metadata.last_sync_at).total_seconds() > 300
     )
     if is_due_for_sync and Config.is_jira_configured() and project_keys:
         try:

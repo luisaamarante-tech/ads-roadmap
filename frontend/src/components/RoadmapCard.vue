@@ -405,8 +405,8 @@ defineExpose({
 .roadmap-card__badge {
   display: inline-block;
   padding: 4px 10px;
-  background: rgb(247 25 99 / 10%);
-  color: #dd1259;
+  background: #F71963;
+  color: #fff;
   border-radius: var(--unnnic-border-radius-sm, 6px);
   font-size: var(--unnnic-font-size-body-sm, 12px);
   font-weight: var(--unnnic-font-weight-medium, 500);

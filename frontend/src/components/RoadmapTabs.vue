@@ -123,8 +123,8 @@ function onTabClick(status: DeliveryStatus): void {
 }
 
 .tabs__tab--active .tabs__count {
-  background: rgb(247 25 99 / 15%);
-  color: #dd1259;
+  background: #F71963;
+  color: #fff;
 }
 
 /* Responsive */

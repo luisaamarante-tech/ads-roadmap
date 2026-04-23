@@ -27,6 +27,7 @@ class FeatureRequestPayload:
     title: str
     description: str
     contact_email: str
+    pillar: str = ""
     website: str = ""  # Honeypot field
 
     def __post_init__(self):
@@ -35,6 +36,7 @@ class FeatureRequestPayload:
         self.title = self.title.strip() if self.title else ""
         self.description = self.description.strip() if self.description else ""
         self.contact_email = self.contact_email.strip() if self.contact_email else ""
+        self.pillar = self.pillar.strip() if self.pillar else ""
 
 
 @dataclass

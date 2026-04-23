@@ -133,6 +133,7 @@ export interface FeatureRequestPayload {
   title: string;
   description: string;
   contactEmail: string;
+  pillar?: string;
   website?: string; // Honeypot field
 }
 
