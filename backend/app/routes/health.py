@@ -46,8 +46,14 @@ def health_check():
 
     project_keys = Config.get_project_keys()
 
-    # Auto-sync on cold start: if cache is empty but JIRA is configured, sync now
-    if metadata.item_count == 0 and Config.is_jira_configured() and project_keys:
+    # Auto-sync if cache is empty OR data is older than 30 minutes
+    from datetime import datetime, timedelta
+    is_due_for_sync = (
+        metadata.item_count == 0
+        or metadata.last_sync_at is None
+        or (datetime.utcnow() - metadata.last_sync_at).total_seconds() > 1800
+    )
+    if is_due_for_sync and Config.is_jira_configured() and project_keys:
         try:
             sync_service = SyncService(cache_service)
             metadata = sync_service.sync()
