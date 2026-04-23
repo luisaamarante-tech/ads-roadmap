@@ -167,12 +167,13 @@ class JiraClient:
 
         try:
             response = self._make_request(
-                "/rest/api/3/search/jql",
+                "/rest/api/3/search",
                 method="POST",
                 json_data={
                     "jql": jql,
                     "fields": self.ALLOWED_FIELDS,
                     "maxResults": 100,
+                    "startAt": 0,
                 },
             )
             return response.get("issues", [])
@@ -657,12 +658,13 @@ class JiraClient:
         for jql in [jql_epic, jql_any]:
             try:
                 search_response = self._make_request(
-                    "/rest/api/3/search/jql",
+                    "/rest/api/3/search",
                     method="POST",
                     json_data={
                         "jql": jql,
-                        "fields": ["key"],  # Only need the key
+                        "fields": ["key"],
                         "maxResults": 1,
+                        "startAt": 0,
                     },
                 )
                 issues = search_response.get("issues", [])
