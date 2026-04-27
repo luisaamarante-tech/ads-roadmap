@@ -38,6 +38,10 @@ export const env = {
   apiUrl: getEnv('VITE_API_URL') || '/api/v1',
   baseUrl: import.meta.env.BASE_URL,
 
+  // Auth Configuration
+  authUsername: getEnv('VITE_AUTH_USERNAME') || '',
+  authPassword: getEnv('VITE_AUTH_PASSWORD') || '',
+
   // WebChat Configuration
   webChat: {
     socketUrl: getEnv('VITE_WEBCHAT_SOCKET_URL') || 'https://websocket.weni.ai',

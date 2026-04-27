@@ -1,15 +1,20 @@
 /**
- * Vue Router configuration for the Weni Public Roadmap.
+ * Vue Router configuration for the VTEX Ads Public Roadmap.
  */
 
 import { createRouter, createWebHistory } from 'vue-router';
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL), // BASE_URL é usado pelo Vite internamente
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
       redirect: '/roadmap',
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: () => import('@/views/LoginView.vue'),
     },
     {
       path: '/roadmap',
@@ -22,6 +27,13 @@ const router = createRouter({
       redirect: '/roadmap',
     },
   ],
+});
+
+// Auth guard: redirect to /login if not authenticated
+router.beforeEach((to) => {
+  const isAuth = !!sessionStorage.getItem('roadmap_auth');
+  if (!isAuth && to.name !== 'login') return { name: 'login' };
+  if (isAuth && to.name === 'login') return { name: 'roadmap' };
 });
 
 export default router;
