@@ -1,17 +1,66 @@
 <template>
   <unnnic-modal
     v-if="showModal"
-    :text="'Request Feature'"
+    :text="'New Request'"
     scheme="neutral"
     @close="handleClose"
   >
     <div class="feature-request-form">
       <p class="feature-request-form__description">
-        Submit a feature request for the VTEX Ads Roadmap. Our team will
-        review and triage your request in the selected media type's backlog.
+        Bring a problem or opportunity to the VTEX Ads team. We'll review,
+        triage and add it to our backlog.
       </p>
 
       <form aria-label="Feature request form" @submit.prevent="handleSubmit">
+        <!-- Title -->
+        <div class="form-field">
+          <unnnic-input
+            id="title-input"
+            v-model="form.title"
+            :label="'What is the problem or opportunity?'"
+            :placeholder="'Brief summary of the problem'"
+            :maxlength="200"
+            :disabled="isSubmitting"
+            required
+            :aria-required="true"
+            :aria-invalid="!!errors.title"
+            :aria-describedby="errors.title ? 'title-error' : undefined"
+          />
+          <span
+            v-if="errors.title"
+            id="title-error"
+            class="form-field__error"
+            role="alert"
+            >{{ errors.title }}</span
+          >
+        </div>
+
+        <!-- Description -->
+        <div class="form-field">
+          <unnnic-text-area
+            id="description-input"
+            v-model="form.description"
+            :label="'Context and business impact'"
+            :placeholder="'Describe the context, who is affected and what the business impact is'"
+            :maxlength="5000"
+            :rows="5"
+            :disabled="isSubmitting"
+            required
+            :aria-required="true"
+            :aria-invalid="!!errors.description"
+            :aria-describedby="
+              errors.description ? 'description-error' : undefined
+            "
+          />
+          <span
+            v-if="errors.description"
+            id="description-error"
+            class="form-field__error"
+            role="alert"
+            >{{ errors.description }}</span
+          >
+        </div>
+
         <!-- Module Selection -->
         <div class="form-field">
           <label for="module-select" class="form-field__label">
@@ -84,62 +133,13 @@
           >
         </div>
 
-        <!-- Title -->
-        <div class="form-field">
-          <unnnic-input
-            id="title-input"
-            v-model="form.title"
-            :label="'Title'"
-            :placeholder="'Brief summary of your feature request'"
-            :maxlength="200"
-            :disabled="isSubmitting"
-            required
-            :aria-required="true"
-            :aria-invalid="!!errors.title"
-            :aria-describedby="errors.title ? 'title-error' : undefined"
-          />
-          <span
-            v-if="errors.title"
-            id="title-error"
-            class="form-field__error"
-            role="alert"
-            >{{ errors.title }}</span
-          >
-        </div>
-
-        <!-- Description -->
-        <div class="form-field">
-          <unnnic-text-area
-            id="description-input"
-            v-model="form.description"
-            :label="'Description'"
-            :placeholder="'Describe the problem you are trying to solve and the desired outcome'"
-            :maxlength="5000"
-            :rows="5"
-            :disabled="isSubmitting"
-            required
-            :aria-required="true"
-            :aria-invalid="!!errors.description"
-            :aria-describedby="
-              errors.description ? 'description-error' : undefined
-            "
-          />
-          <span
-            v-if="errors.description"
-            id="description-error"
-            class="form-field__error"
-            role="alert"
-            >{{ errors.description }}</span
-          >
-        </div>
-
         <!-- Contact Email -->
         <div class="form-field">
           <unnnic-input
             id="email-input"
             v-model="form.contactEmail"
             :label="'Contact Email'"
-            :placeholder="'your.email@example.com'"
+            :placeholder="'your@vtex.com'"
             type="email"
             :disabled="isSubmitting"
             required
@@ -169,38 +169,47 @@
 
         <!-- Submit/Cancel buttons -->
         <div class="form-actions">
-          <unnnic-button
-            type="secondary"
-            :text="'Cancel'"
+          <button
+            type="button"
+            class="form-actions__cancel"
             :disabled="isSubmitting"
             @click="handleClose"
-          />
-          <unnnic-button
-            type="primary"
-            :text="isSubmitting ? 'Submitting...' : 'Submit Request'"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="form-actions__submit"
+            :class="{ 'form-actions__submit--active': isFormValid && !isSubmitting }"
             :disabled="isSubmitting || !isFormValid"
-            :loading="isSubmitting"
             @click="handleSubmit"
-          />
+          >
+            {{ isSubmitting ? 'Submitting...' : 'Submit Request' }}
+          </button>
         </div>
 
         <!-- Success message -->
         <div v-if="successMessage" class="success-message">
-          <unnnic-alert
-            :text="successMessage"
-            :title="'Feature Request Submitted'"
-            type="success"
-            @close="handleClose"
+          <div class="success-message__title">✅ Request received! 🎉</div>
+          <p class="success-message__body">
+            Your request has been added to the VTEX Ads product backlog.
+            Our team will review and prioritize it.
+          </p>
+          <p v-if="issueUrl && issueKey" class="success-message__link">
+            <a
+              :href="issueUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="success-message__jira-link"
+            >View your request in Jira → {{ issueKey }}</a>
+          </p>
+          <button
+            type="button"
+            class="success-message__close"
+            @click="handleClose"
           >
-            <template v-if="issueUrl" #description>
-              <p>
-                Your request has been created as
-                <a :href="issueUrl" target="_blank" rel="noopener noreferrer">{{
-                  issueKey
-                }}</a>
-              </p>
-            </template>
-          </unnnic-alert>
+            Close
+          </button>
         </div>
 
         <!-- Error message -->
@@ -427,9 +436,10 @@ function resetForm() {
 
 .feature-request-form__description {
   margin-bottom: 1.5rem;
-  color: #67738b;
-  font-size: 0.875rem;
+  color: #9ca3af;
+  font-size: 0.8125rem;
   line-height: 1.5;
+  text-align: center;
 }
 
 .form-field {
@@ -494,11 +504,101 @@ function resetForm() {
 .form-actions {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: 1rem;
   margin-top: 2rem;
 }
 
-.success-message,
+.form-actions__cancel {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 0.875rem;
+  cursor: pointer;
+  padding: 0.5rem 0.75rem;
+  transition: color 0.2s;
+}
+
+.form-actions__cancel:hover:not(:disabled) {
+  color: #6b7280;
+}
+
+.form-actions__cancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.form-actions__submit {
+  padding: 0.625rem 1.25rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: not-allowed;
+  background: #e5e7eb;
+  color: #9ca3af;
+  transition: background 0.2s, color 0.2s;
+}
+
+.form-actions__submit--active {
+  background: #F71963;
+  color: #fff;
+  cursor: pointer;
+}
+
+.form-actions__submit--active:hover {
+  background: #dd1259;
+}
+
+.success-message {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.success-message__title {
+  font-weight: 700;
+  color: #1a1a1a;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.success-message__body {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin: 0 0 0.75rem;
+}
+
+.success-message__link {
+  margin: 0 0 1rem;
+}
+
+.success-message__jira-link {
+  color: #F71963;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.success-message__jira-link:hover {
+  text-decoration: underline;
+}
+
+.success-message__close {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 0.875rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+}
+
+.success-message__close:hover {
+  color: #6b7280;
+}
+
 .error-message {
   margin-top: 1rem;
 }
