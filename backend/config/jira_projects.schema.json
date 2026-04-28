@@ -105,15 +105,15 @@
             },
             "roadmap_image_url_3": {
               "type": "string",
-              "pattern": "^customfield_\\d{5,}$",
-              "description": "Custom field ID for third image URL",
-              "examples": ["customfield_10105"]
+              "pattern": "^(customfield_\\d{5,})?$",
+              "description": "Custom field ID for third image URL (optional, use empty string if not available)",
+              "examples": ["customfield_10105", ""]
             },
             "roadmap_image_url_4": {
               "type": "string",
-              "pattern": "^customfield_\\d{5,}$",
-              "description": "Custom field ID for fourth image URL",
-              "examples": ["customfield_10106"]
+              "pattern": "^(customfield_\\d{5,})?$",
+              "description": "Custom field ID for fourth image URL (optional, use empty string if not available)",
+              "examples": ["customfield_10106", ""]
             },
             "roadmap_likes": {
               "type": "string",

@@ -18,6 +18,24 @@
       "roadmap_likes": "customfield_17142",
       "semester_goal": "customfield_17175",
       "pillar": "customfield_17176"
+    },
+    "AO": {
+      "public_roadmap": "customfield_17247",
+      "roadmap_status": "customfield_17258",
+      "media_type": "customfield_17255",
+      "release_year": "customfield_17250",
+      "release_quarter": "customfield_17249",
+      "release_month": "customfield_17248",
+      "documentation_url": "customfield_17260",
+      "roadmap_title": "customfield_17259",
+      "roadmap_description": "customfield_17251",
+      "roadmap_image_url_1": "customfield_17252",
+      "roadmap_image_url_2": "customfield_17253",
+      "roadmap_image_url_3": "",
+      "roadmap_image_url_4": "",
+      "roadmap_likes": "customfield_17254",
+      "semester_goal": "customfield_17257",
+      "pillar": "customfield_17256"
     }
   }
 }
