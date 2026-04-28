@@ -475,6 +475,12 @@ class JiraClient:
         if not field_value:
             return None
 
+        # Handle multi-select field (array) - take first value
+        if isinstance(field_value, list):
+            if not field_value:
+                return None
+            field_value = field_value[0]
+
         # Handle select field (object with value property)
         if isinstance(field_value, dict):
             value = field_value.get("value", "")
@@ -494,6 +500,12 @@ class JiraClient:
         if not field_value:
             return None
 
+        # Handle multi-select field (array) - take first value
+        if isinstance(field_value, list):
+            if not field_value:
+                return None
+            field_value = field_value[0]
+
         # Handle select field (object with value property)
         if isinstance(field_value, dict):
             value = field_value.get("value", "")
@@ -512,6 +524,12 @@ class JiraClient:
         """Extract text from a custom field."""
         if not field_value:
             return ""
+
+        # Handle multi-select field (array) - take first value
+        if isinstance(field_value, list):
+            if not field_value:
+                return ""
+            field_value = field_value[0]
 
         # Handle select field (object with value property)
         if isinstance(field_value, dict):
