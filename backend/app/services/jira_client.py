@@ -548,11 +548,27 @@ class JiraClient:
             return None
 
     def _extract_list_field(self, field_value) -> list[str]:
-        """Extract a list of string values from a multi-value JIRA field."""
+        """Extract a list of string values from a multi-value JIRA field.
+
+        Handles:
+        - list of strings: ["Goal 1", "Goal 2"]  (VA labels fields)
+        - list of dicts:   [{"value": "Now"}]    (AO multi-select fields)
+        - single dict:     {"value": "Pillar"}   (AO single-select fields)
+        - plain string:    "Goal name"           (AO text fields)
+        """
         if not field_value:
             return []
         if isinstance(field_value, list):
-            return [str(v) for v in field_value if v]
+            result = []
+            for v in field_value:
+                if isinstance(v, dict):
+                    result.append(v.get("value", str(v)))
+                elif v:
+                    result.append(str(v))
+            return result
+        if isinstance(field_value, dict):
+            value = field_value.get("value", "")
+            return [value] if value else []
         if isinstance(field_value, str):
             return [field_value]
         return []
