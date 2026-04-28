@@ -327,10 +327,7 @@ defineExpose({
         </svg>
       </a>
 
-      <!-- Share button in expanded view -->
-      <div class="roadmap-card__share-expanded">
-        <ShareButton :epic-id="item.id" size="medium" variant="outlined" />
-      </div>
+
     </div>
 
     <!-- Error message -->
