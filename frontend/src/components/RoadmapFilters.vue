@@ -640,12 +640,15 @@ onUnmounted(() => {
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
-  right: 0;
+  right: auto;
+  min-width: 220px;
+  width: max-content;
+  max-width: 360px;
   z-index: 100;
   display: flex;
   flex-direction: column;
   gap: var(--unnnic-spacing-stack-xs, 4px);
-  max-height: 280px;
+  max-height: 300px;
   overflow-y: auto;
   padding: 8px;
   border: 1px solid var(--unnnic-color-neutral-soft, #e8e8e8);
