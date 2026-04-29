@@ -595,14 +595,17 @@ class JiraClient:
         if not url:
             return None
 
-        # Convert Google Drive share/view links to direct image URLs
+        # Convert Google Drive share/view links to direct image URLs.
+        # drive.usercontent.google.com/download returns 200 image/* directly,
+        # whereas drive.google.com/uc?export=view does a 303 redirect that
+        # browsers may not follow correctly inside <img> tags.
         import re as _re
         gdrive_match = _re.search(
             r"https://drive\.google\.com/file/d/([^/]+)", url
         )
         if gdrive_match:
             file_id = gdrive_match.group(1)
-            return f"https://drive.google.com/uc?export=view&id={file_id}"
+            return f"https://drive.usercontent.google.com/download?id={file_id}&export=view"
 
         return url
 
