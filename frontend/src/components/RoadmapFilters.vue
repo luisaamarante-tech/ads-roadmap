@@ -318,7 +318,7 @@ onUnmounted(() => {
                 @change="onModuleToggle(mod.id)"
               />
               <span class="filters__module-label">
-                {{ mod.name }}
+                {{ mod.name.replace(/-/g, ' ') }}
               </span>
             </label>
           </div>
@@ -380,7 +380,7 @@ onUnmounted(() => {
                 @change="onGoalToggle(goal.id)"
               />
               <span class="filters__module-label">
-                {{ goal.name }}
+                {{ goal.name.replace(/-/g, ' ') }}
               </span>
             </label>
           </div>
@@ -442,7 +442,7 @@ onUnmounted(() => {
                 @change="onPillarToggle(pillar.id)"
               />
               <span class="filters__module-label">
-                {{ pillar.name }}
+                {{ pillar.name.replace(/-/g, ' ') }}
               </span>
             </label>
           </div>
