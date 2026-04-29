@@ -574,15 +574,37 @@ class JiraClient:
         return []
 
     def _extract_url_field(self, field_value) -> Optional[str]:
-        """Extract URL from a custom field."""
+        """Extract URL from a custom field.
+
+        Converts Google Drive view/share URLs to direct image URLs so that
+        <img src="..."> works without authentication.
+
+        Example conversion:
+          https://drive.google.com/file/d/{ID}/view?usp=sharing
+          → https://drive.google.com/uc?export=view&id={ID}
+        """
         if not field_value:
             return None
 
         # Could be a string or an object with URL property
         if isinstance(field_value, dict):
-            return field_value.get("url") or field_value.get("value")
+            url = field_value.get("url") or field_value.get("value")
+        else:
+            url = str(field_value) if field_value else None
 
-        return str(field_value) if field_value else None
+        if not url:
+            return None
+
+        # Convert Google Drive share/view links to direct image URLs
+        import re as _re
+        gdrive_match = _re.search(
+            r"https://drive\.google\.com/file/d/([^/]+)", url
+        )
+        if gdrive_match:
+            file_id = gdrive_match.group(1)
+            return f"https://drive.google.com/uc?export=view&id={file_id}"
+
+        return url
 
     def _validate_url(self, url: str) -> bool:
         """
