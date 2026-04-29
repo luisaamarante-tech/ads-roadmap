@@ -450,11 +450,16 @@ onUnmounted(() => {
       </div>
 
       <!-- Clear filters -->
-      <div v-if="hasActiveFilters" class="filters__group">
-        <button class="filters__clear-btn" @click="onClearFiltersClick">
+      <div v-if="hasActiveFilters" class="filters__group filters__group--clear">
+        <button
+          class="filters__clear-btn"
+          title="Clear filters"
+          aria-label="Clear filters"
+          @click="onClearFiltersClick"
+        >
           <svg
-            width="16"
-            height="16"
+            width="20"
+            height="20"
             viewBox="0 0 16 16"
             fill="none"
             aria-hidden="true"
@@ -467,7 +472,6 @@ onUnmounted(() => {
               stroke-linejoin="round"
             />
           </svg>
-          Clear Filters
         </button>
       </div>
     </div>
@@ -720,25 +724,31 @@ onUnmounted(() => {
   user-select: none;
 }
 
+/* BEM: Modifier - clear */
+.filters__group--clear {
+  flex: 0 0 auto;
+}
+
 /* BEM: Element - clear-btn */
 .filters__clear-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 10px 16px;
-  font-size: var(--unnnic-font-size-body-md, 14px);
-  font-weight: var(--unnnic-font-weight-medium, 500);
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
   border: none;
   background: transparent;
-  color: var(--unnnic-color-aux-red-500, #e53e3e);
+  color: #9ca3af;
   cursor: pointer;
-  transition: all 0.2s;
+  border-radius: 6px;
+  transition: color 0.2s;
   margin-top: 21px; /* Align with selects */
 }
 
 .filters__clear-btn:hover {
-  background: var(--unnnic-color-aux-red-100, #fff5f5);
-  border-radius: var(--unnnic-border-radius-sm, 8px);
+  color: #F71963;
+  background: transparent;
 }
 
 /* Truncate label text in dropdowns when space is tight */
